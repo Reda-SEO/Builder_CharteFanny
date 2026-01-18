@@ -1,0 +1,1661 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Générateur de charte graphique (single file)</title>
+  <style>
+    :root{
+      --bg: #0b0f14;
+      --panel: #0f1620;
+      --paper: #0b0f14;
+      --text: #e8eef6;
+      --muted: #a9b7c6;
+      --border: rgba(255,255,255,.10);
+      --shadow: rgba(0,0,0,.35);
+
+      /* Palette (pilotée par l'outil) */
+      --primary: #0A1929;
+      --primary-2: #274359;
+      --accent: #c77a3d;
+      --accent-2: #D4A574;
+      --accent-3: #a0522d;
+      --light: #e3f2fd;
+      --light-2: #ffffff;
+
+      /* Typo */
+      --font-ui: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      --font-primary: ui-serif, Georgia, "Times New Roman", Times, serif;
+      --font-secondary: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+
+      --radius: 14px;
+      --radius-lg: 18px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: var(--font-ui);
+      color: var(--text);
+      background: radial-gradient(1200px 700px at 10% 10%, rgba(199,122,61,.14), transparent 55%),
+                  radial-gradient(900px 600px at 90% 0%, rgba(39,67,89,.22), transparent 55%),
+                  var(--bg);
+    }
+
+    a{color:inherit}
+    button,input,select,textarea{font-family:inherit}
+
+    .app{
+      display:grid;
+      grid-template-columns: 380px 1fr;
+      min-height:100vh;
+    }
+
+    /* Left panel */
+    .panel{
+      position:sticky;
+      top:0;
+      height:100vh;
+      overflow:auto;
+      background: linear-gradient(180deg, rgba(255,255,255,.03), transparent 35%), var(--panel);
+      border-right: 1px solid var(--border);
+      padding: 18px 16px 28px;
+    }
+
+    .panel h1{
+      font-size: 15px;
+      letter-spacing:.3px;
+      margin: 0 0 8px;
+      font-weight: 700;
+    }
+
+    .panel .sub{
+      font-size: 12px;
+      color: var(--muted);
+      margin: 0 0 14px;
+      line-height:1.35;
+    }
+
+    .card{
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+      box-shadow: 0 12px 24px var(--shadow);
+      margin-bottom: 12px;
+    }
+
+    .card h2{
+      margin:0 0 8px;
+      font-size: 12px;
+      letter-spacing:.3px;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .row{display:flex; gap:10px; align-items:center}
+    .row.wrap{flex-wrap:wrap}
+    .grow{flex:1}
+
+    .drop{
+      border: 1px dashed rgba(255,255,255,.22);
+      border-radius: var(--radius);
+      padding: 12px;
+      background: rgba(0,0,0,.18);
+      cursor:pointer;
+      user-select:none;
+    }
+    .drop.dragover{outline:2px solid rgba(227,242,253,.35)}
+
+    .hint{font-size:12px;color:var(--muted);line-height:1.35}
+
+    .btns{display:flex; gap:8px; flex-wrap:wrap}
+    .btn{
+      appearance:none;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      padding: 9px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      cursor:pointer;
+    }
+    .btn:hover{background: rgba(255,255,255,.09)}
+    .btn.primary{border-color: rgba(199,122,61,.40); background: rgba(199,122,61,.12)}
+
+    .field{display:flex; flex-direction:column; gap:6px; margin-top:10px}
+    .label{font-size:11px; color: var(--muted)}
+    .input{
+      width:100%;
+      padding: 9px 10px;
+      border-radius: 12px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.22);
+      color: var(--text);
+      font-size: 12px;
+      outline:none;
+    }
+    .input:focus{border-color: rgba(227,242,253,.35)}
+
+    .swatchRow{
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap:10px;
+      align-items:center;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+      margin-top: 10px;
+    }
+
+    .swatchMeta{display:flex; flex-direction:column; gap:6px}
+    .swatchMeta .mini{display:flex; gap:8px; align-items:center}
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 7px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.04);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .colorDot{
+      width: 14px;
+      height: 14px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: var(--primary);
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.25);
+    }
+
+    input[type="color"]{
+      width: 44px;
+      height: 34px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: transparent;
+      padding: 0;
+      cursor:pointer;
+    }
+
+    /* Right preview */
+    .preview{
+      padding: 22px 22px 60px;
+      overflow:auto;
+    }
+
+    .page{
+      max-width: 980px;
+      margin: 0 auto 18px;
+      background: rgba(0,0,0,.22);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 18px 42px var(--shadow);
+      padding: 22px;
+    }
+
+    .pageHeader{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      margin-bottom: 16px;
+    }
+
+    .version{
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .docTitle{
+      font-family: var(--font-primary);
+      font-size: 34px;
+      margin: 0;
+      letter-spacing: .2px;
+    }
+
+    .sectionTitle{
+      font-size: 12px;
+      letter-spacing:.3px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0 0 10px;
+      font-weight: 800;
+    }
+
+    .kicker{
+      font-family: var(--font-primary);
+      font-size: 26px;
+      margin: 0 0 10px;
+      font-weight: 700;
+    }
+
+    .para{
+      color: rgba(232,238,246,.92);
+      line-height:1.5;
+      font-size: 14px;
+      margin: 0;
+    }
+
+    .muted{color: var(--muted)}
+
+    .indexList{
+      display:grid;
+      gap:10px;
+      margin-top: 10px;
+    }
+
+    .indexItem{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.16);
+      text-decoration:none;
+    }
+
+    .indexItem:hover{background: rgba(255,255,255,.06)}
+
+    .logoBlock{
+      display:grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 16px;
+      align-items:start;
+    }
+
+    .logoCard{
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.16);
+      padding: 16px;
+    }
+
+    .logoStage{
+      height: 120px;
+      border-radius: 14px;
+      border: 1px dashed rgba(255,255,255,.18);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      background: rgba(255,255,255,.04);
+    }
+
+    .logoStage.dark{background: var(--primary)}
+    .logoStage.light{background: var(--light)}
+
+    .logoStage img{max-width:100%; max-height:100%; object-fit:contain}
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.06);
+      font-size: 12px;
+      color: rgba(232,238,246,.92);
+      margin-bottom: 10px;
+    }
+
+    .colorsGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .colorCard{
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.16);
+      padding: 14px;
+    }
+
+    .swatches{display:flex; flex-direction:column; gap:10px; margin-top: 10px}
+
+    .swatch{
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.10);
+      overflow:hidden;
+    }
+
+    .swatchTop{
+      height: 54px;
+      background: var(--primary);
+    }
+
+    .swatchBottom{
+      display:flex;
+      justify-content:space-between;
+      padding: 10px 12px;
+      font-size: 12px;
+      color: rgba(232,238,246,.90);
+      background: rgba(0,0,0,.18);
+    }
+
+    .typoGrid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 12px;
+    }
+
+    .typoCard{
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.16);
+      padding: 16px;
+    }
+
+    .typoSample{
+      font-size: 22px;
+      margin: 6px 0 10px;
+    }
+
+    .typoLines{
+      font-size: 13px;
+      line-height:1.45;
+      color: rgba(232,238,246,.92);
+      white-space: pre-wrap;
+      word-break: break-word;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.14);
+      padding: 10px 12px;
+    }
+
+    .moodGrid{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .mood{
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      overflow:hidden;
+      aspect-ratio: 4/3;
+      position:relative;
+    }
+
+    .mood img{width:100%; height:100%; object-fit:cover; display:block}
+
+    .mood .moodActions{
+      position:absolute;
+      inset:auto 8px 8px 8px;
+      display:flex;
+      gap:8px;
+      justify-content:flex-end;
+      opacity:0;
+      transition: opacity .15s ease;
+    }
+
+    .mood:hover .moodActions{opacity:1}
+
+    .miniBtn{
+      appearance:none;
+      border:1px solid rgba(255,255,255,.16);
+      background: rgba(0,0,0,.35);
+      color: rgba(232,238,246,.95);
+      border-radius: 10px;
+      font-size: 12px;
+      padding: 6px 8px;
+      cursor:pointer;
+    }
+
+    /* contenteditable affordance */
+    [contenteditable="true"]{
+      outline: none;
+      border-radius: 10px;
+      padding: 2px 4px;
+    }
+    [contenteditable="true"]:focus{
+      box-shadow: 0 0 0 2px rgba(227,242,253,.20);
+      background: rgba(255,255,255,.05);
+    }
+
+    /* Responsive */
+    @media (max-width: 980px){
+      .app{grid-template-columns: 1fr}
+      .panel{position:relative; height:auto}
+    }
+
+    /* Print */
+    @media print{
+      :root{ --bg:#ffffff; --text:#0b0f14; --muted:#3c4a58; --panel:#ffffff; --border:rgba(0,0,0,.12); }
+      body{background:#fff}
+      .app{display:block}
+      .panel{display:none}
+      .preview{padding:0}
+      .page{box-shadow:none; border: 1px solid rgba(0,0,0,.12); background:#fff; break-after: page}
+      .para{color:#0b0f14}
+      .indexItem{color:#0b0f14; border-color: rgba(0,0,0,.12); background:#fff}
+      .logoCard,.colorCard,.typoCard{background:#fff}
+      .typoLines{background:#fff}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- LEFT PANEL -->
+    <aside class="panel" aria-label="Panneau de contrôle">
+      <h1>Générateur de charte graphique</h1>
+      <p class="sub">Fichier unique <strong>index.html</strong>, sans framework. Glissez-déposez un logo pour extraire une palette et personnaliser le modèle. Tous les champs restent éditables.</p>
+
+      <div class="card" id="cardLogo">
+        <h2>Logo</h2>
+        <div class="drop" id="logoDrop" tabindex="0" role="button" aria-label="Déposer un logo">
+          <div class="row" style="justify-content:space-between; gap:12px;">
+            <div class="grow">
+              <div class="pill"><span class="colorDot" id="logoDot"></span><span id="logoStatus">Déposer un logo (PNG/JPG/SVG)</span></div>
+              <div class="hint" style="margin-top:8px;">Astuce : un logo avec plusieurs couleurs donnera une palette plus riche. Vous pourrez ajuster ensuite à la main.</div>
+            </div>
+            <div>
+              <button class="btn" id="btnPickLogo" type="button">Choisir…</button>
+              <input id="logoFile" type="file" accept="image/png,image/jpeg,image/svg+xml" hidden>
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <div class="label">Nom de la marque</div>
+          <input class="input" id="brandName" type="text" placeholder="Ex. Flowless" />
+        </div>
+        <div class="field">
+          <div class="label">Baseline</div>
+          <input class="input" id="brandTagline" type="text" placeholder="Ex. Précision et attention au détail" />
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Palette</h2>
+        <div class="hint">La palette est détectée automatiquement puis appliquée au modèle via des variables CSS. Vous pouvez tout modifier manuellement.</div>
+
+        <div class="swatchRow" data-family="primary">
+          <div class="swatchMeta">
+            <div class="mini">
+              <input class="input" data-role="name" type="text" placeholder="Nom" style="padding:8px 10px" />
+              <span class="pill"><span class="colorDot" data-role="dot" style="background:var(--primary)"></span><span>Primary</span></span>
+            </div>
+            <div class="row wrap">
+              <label class="pill">Solid <input type="color" data-role="solidPicker" /></label>
+              <input class="input" data-role="solidHex" type="text" placeholder="#000000" style="width:140px" />
+            </div>
+            <div class="row wrap">
+              <label class="pill">Var 1 <input type="color" data-role="v1Picker" /></label>
+              <input class="input" data-role="v1Hex" type="text" placeholder="#000000" style="width:140px" />
+            </div>
+          </div>
+          <div class="row" style="justify-content:flex-end">
+            <button class="btn" type="button" data-action="auto">Auto</button>
+          </div>
+        </div>
+
+        <div class="swatchRow" data-family="accent">
+          <div class="swatchMeta">
+            <div class="mini">
+              <input class="input" data-role="name" type="text" placeholder="Nom" style="padding:8px 10px" />
+              <span class="pill"><span class="colorDot" data-role="dot" style="background:var(--accent)"></span><span>Accent</span></span>
+            </div>
+            <div class="row wrap">
+              <label class="pill">Solid <input type="color" data-role="solidPicker" /></label>
+              <input class="input" data-role="solidHex" type="text" placeholder="#000000" style="width:140px" />
+            </div>
+            <div class="row wrap">
+              <label class="pill">Var 1 <input type="color" data-role="v1Picker" /></label>
+              <input class="input" data-role="v1Hex" type="text" placeholder="#000000" style="width:140px" />
+            </div>
+            <div class="row wrap">
+              <label class="pill">Var 2 <input type="color" data-role="v2Picker" /></label>
+              <input class="input" data-role="v2Hex" type="text" placeholder="#000000" style="width:140px" />
+            </div>
+          </div>
+          <div class="row" style="justify-content:flex-end">
+            <button class="btn" type="button" data-action="auto">Auto</button>
+          </div>
+        </div>
+
+        <div class="swatchRow" data-family="light">
+          <div class="swatchMeta">
+            <div class="mini">
+              <input class="input" data-role="name" type="text" placeholder="Nom" style="padding:8px 10px" />
+              <span class="pill"><span class="colorDot" data-role="dot" style="background:var(--light)"></span><span>Light</span></span>
+            </div>
+            <div class="row wrap">
+              <label class="pill">Solid <input type="color" data-role="solidPicker" /></label>
+              <input class="input" data-role="solidHex" type="text" placeholder="#000000" style="width:140px" />
+            </div>
+            <div class="row wrap">
+              <label class="pill">Var 1 <input type="color" data-role="v1Picker" /></label>
+              <input class="input" data-role="v1Hex" type="text" placeholder="#000000" style="width:140px" />
+            </div>
+          </div>
+          <div class="row" style="justify-content:flex-end">
+            <button class="btn" type="button" data-action="auto">Auto</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Typographies</h2>
+        <div class="field">
+          <div class="label">Typographie principale (nom CSS)</div>
+          <input class="input" id="primaryFont" type="text" placeholder="Ex. ui-serif, Georgia, Times" />
+        </div>
+        <div class="field">
+          <div class="label">Typographie secondaire (nom CSS)</div>
+          <input class="input" id="secondaryFont" type="text" placeholder="Ex. ui-sans-serif, system-ui" />
+        </div>
+        <div class="hint">Cette version n'embarque pas de fichiers de fonts. Vous pouvez renseigner des polices disponibles sur le poste ou gérer un @font-face en V2.</div>
+      </div>
+
+      <div class="card" id="cardMood">
+        <h2>Moodboard</h2>
+        <div class="drop" id="moodDrop" tabindex="0" role="button" aria-label="Déposer des images moodboard">
+          <div class="row" style="justify-content:space-between; gap:12px;">
+            <div class="grow">
+              <div class="pill"><span class="colorDot" style="background:rgba(227,242,253,.35)"></span><span>Déposer des images (multi)</span></div>
+              <div class="hint" style="margin-top:8px;">Vous pouvez ajouter/supprimer/réordonner depuis l'aperçu.</div>
+            </div>
+            <div>
+              <button class="btn" id="btnPickMood" type="button">Ajouter…</button>
+              <input id="moodFiles" type="file" accept="image/*" multiple hidden>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Actions</h2>
+        <div class="btns">
+          <button class="btn primary" id="btnPrint" type="button">Imprimer</button>
+          <button class="btn" id="btnExport" type="button">Exporter JSON</button>
+          <button class="btn" id="btnImport" type="button">Importer JSON</button>
+          <input id="importFile" type="file" accept="application/json" hidden>
+          <button class="btn" id="btnReset" type="button">Réinitialiser</button>
+        </div>
+        <div class="hint" style="margin-top:10px;">L'export JSON inclut le logo et le moodboard en DataURL afin de rester 100% autonome.</div>
+      </div>
+
+      <div class="card">
+        <h2>Conseils d'usage</h2>
+        <ul class="hint" style="margin:0; padding-left:18px;">
+          <li>Modifiez les textes directement dans l'aperçu (clic + saisie).</li>
+          <li>Si une couleur auto ne convient pas, remplacez-la via les champs hex.</li>
+          <li>Pour une cohérence forte, gardez un Primary sombre, un Accent plus chaud/saturé et un Light très clair.</li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- RIGHT PREVIEW -->
+    <main class="preview" aria-label="Aperçu de la charte">
+      <section class="page" id="page-cover">
+        <div class="pageHeader">
+          <div>
+            <h1 class="docTitle" contenteditable="true" data-bind="texts.coverTitle">Charte graphique</h1>
+          </div>
+          <div class="version" contenteditable="true" data-bind="meta.version">Version 1.01</div>
+        </div>
+        <p class="para muted" contenteditable="true" data-bind="texts.coverSubtitle">Document généré depuis un modèle éditable.</p>
+      </section>
+
+      <section class="page" id="page-index">
+        <div class="pageHeader">
+          <div>
+            <div class="sectionTitle">Index</div>
+            <div class="kicker" contenteditable="true" data-bind="texts.indexTitle">Sommaire</div>
+          </div>
+          <div class="version" contenteditable="true" data-bind="meta.version">Version 1.01</div>
+        </div>
+
+        <div class="indexList">
+          <a class="indexItem" href="#page-presentation"><span contenteditable="true" data-bind="texts.indexItem1">Présentation</span><span class="muted">2</span></a>
+          <a class="indexItem" href="#page-logos"><span contenteditable="true" data-bind="texts.indexItem2">Logos & déclinaisons</span><span class="muted">3</span></a>
+          <a class="indexItem" href="#page-colors"><span contenteditable="true" data-bind="texts.indexItem3">Couleurs</span><span class="muted">5</span></a>
+          <a class="indexItem" href="#page-typography"><span contenteditable="true" data-bind="texts.indexItem4">Typographies</span><span class="muted">6</span></a>
+          <a class="indexItem" href="#page-moodboard"><span contenteditable="true" data-bind="texts.indexItem5">Moodboard</span><span class="muted">8</span></a>
+        </div>
+      </section>
+
+      <section class="page" id="page-presentation">
+        <div class="pageHeader">
+          <div>
+            <div class="sectionTitle" contenteditable="true" data-bind="texts.presentationLabel">Présentation</div>
+            <div class="kicker" contenteditable="true" data-bind="brand.tagline">Précision et attention au détail</div>
+          </div>
+          <div class="version" contenteditable="true" data-bind="meta.version">Version 1.01</div>
+        </div>
+
+        <p class="para" contenteditable="true" data-bind="texts.presentationBody">
+          Décrivez ici l'intention de la marque, son positionnement, et les principes directeurs de l'identité visuelle.
+        </p>
+      </section>
+
+      <section class="page" id="page-logos">
+        <div class="pageHeader">
+          <div>
+            <div class="sectionTitle" contenteditable="true" data-bind="texts.logosLabel">Logos & déclinaisons</div>
+            <div class="kicker" contenteditable="true" data-bind="texts.logoMainTitle">Logo principal</div>
+          </div>
+          <div class="version" contenteditable="true" data-bind="meta.version">Version 1.01</div>
+        </div>
+
+        <div class="logoBlock">
+          <div class="logoCard">
+            <div class="badge">Aperçu logo</div>
+            <div class="logoStage" id="logoStageMain">
+              <img id="logoImgMain" alt="Logo" />
+            </div>
+            <p class="para" style="margin-top:12px" contenteditable="true" data-bind="texts.logoDescription">
+              Décrivez le logotype : construction, symbolique, intentions typographiques, et règles d'usage.
+            </p>
+          </div>
+
+          <div class="logoCard">
+            <div class="badge" contenteditable="true" data-bind="texts.logoVariantsTitle">Déclinaisons</div>
+            <div class="row" style="gap:12px">
+              <div class="grow">
+                <div class="hint muted" contenteditable="true" data-bind="texts.logoVariantHint">
+                  Adaptez le logo pour garantir une lisibilité optimale sur fonds sombres et clairs.
+                </div>
+              </div>
+            </div>
+
+            <div style="display:grid; gap:12px; margin-top:12px">
+              <div>
+                <div class="hint" style="margin:0 0 8px" contenteditable="true" data-bind="texts.variantDarkLabel">Version fond sombre</div>
+                <div class="logoStage dark" id="logoStageDark">
+                  <img id="logoImgDark" alt="Logo fond sombre" />
+                </div>
+              </div>
+              <div>
+                <div class="hint" style="margin:0 0 8px" contenteditable="true" data-bind="texts.variantLightLabel">Version fond clair</div>
+                <div class="logoStage light" id="logoStageLight">
+                  <img id="logoImgLight" alt="Logo fond clair" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-colors">
+        <div class="pageHeader">
+          <div>
+            <div class="sectionTitle" contenteditable="true" data-bind="texts.colorsLabel">Couleurs</div>
+            <div class="kicker" contenteditable="true" data-bind="texts.colorsTitle">Palette chromatique</div>
+          </div>
+          <div class="version" contenteditable="true" data-bind="meta.version">Version 1.01</div>
+        </div>
+
+        <p class="para" contenteditable="true" data-bind="texts.colorsIntro">
+          Présentez la logique de votre palette : rôle du Primary, place de l'Accent, et fonctions des tons clairs.
+        </p>
+
+        <div class="colorsGrid">
+          <div class="colorCard">
+            <div class="badge" id="badgePrimaryName" contenteditable="true" data-bind="colors.primary.name">Bleu nuit</div>
+            <p class="para" style="margin-top:6px" contenteditable="true" data-bind="texts.primaryExplain">
+              Le Primary apporte profondeur et autorité, établissant sérieux et fiabilité.
+            </p>
+            <div class="swatches">
+              <div class="swatch">
+                <div class="swatchTop" id="swatchPrimarySolid" style="background:var(--primary)"></div>
+                <div class="swatchBottom"><span>Solid</span><span id="hexPrimarySolid">#0A1929</span></div>
+              </div>
+              <div class="swatch">
+                <div class="swatchTop" id="swatchPrimaryVar" style="background:var(--primary-2)"></div>
+                <div class="swatchBottom"><span>Variante</span><span id="hexPrimaryVar">#274359</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="colorCard">
+            <div class="badge" id="badgeAccentName" contenteditable="true" data-bind="colors.accent.name">Cuivré</div>
+            <p class="para" style="margin-top:6px" contenteditable="true" data-bind="texts.accentExplain">
+              L'Accent introduit chaleur et distinction premium, créant un point de focus.
+            </p>
+            <div class="swatches">
+              <div class="swatch">
+                <div class="swatchTop" id="swatchAccentSolid" style="background:var(--accent)"></div>
+                <div class="swatchBottom"><span>Solid</span><span id="hexAccentSolid">#c77a3d</span></div>
+              </div>
+              <div class="swatch">
+                <div class="swatchTop" id="swatchAccentVar1" style="background:var(--accent-2)"></div>
+                <div class="swatchBottom"><span>Variante</span><span id="hexAccentVar1">#D4A574</span></div>
+              </div>
+              <div class="swatch">
+                <div class="swatchTop" id="swatchAccentVar2" style="background:var(--accent-3)"></div>
+                <div class="swatchBottom"><span>Variante</span><span id="hexAccentVar2">#a0522d</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="colorCard">
+            <div class="badge" id="badgeLightName" contenteditable="true" data-bind="colors.light.name">Bleu givré</div>
+            <p class="para" style="margin-top:6px" contenteditable="true" data-bind="texts.lightExplain">
+              Les tons clairs apportent clarté et respiration, améliorant la lisibilité.
+            </p>
+            <div class="swatches">
+              <div class="swatch">
+                <div class="swatchTop" id="swatchLightSolid" style="background:var(--light)"></div>
+                <div class="swatchBottom"><span>Solid</span><span id="hexLightSolid">#e3f2fd</span></div>
+              </div>
+              <div class="swatch">
+                <div class="swatchTop" id="swatchLightVar" style="background:var(--light-2)"></div>
+                <div class="swatchBottom"><span>Variante</span><span id="hexLightVar">#ffffff</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:14px">
+          <h2>Couleurs solid</h2>
+          <div class="row wrap" style="gap:10px">
+            <span class="pill"><span class="colorDot" id="dotPrimarySolid" style="background:var(--primary)"></span><span id="txtPrimarySolid">Primary (solid) <span class="muted" id="txtPrimarySolidHex">#0A1929</span></span></span>
+            <span class="pill"><span class="colorDot" id="dotAccentSolid" style="background:var(--accent)"></span><span id="txtAccentSolid">Accent (solid) <span class="muted" id="txtAccentSolidHex">#c77a3d</span></span></span>
+            <span class="pill"><span class="colorDot" id="dotLightSolid" style="background:var(--light)"></span><span id="txtLightSolid">Light (solid) <span class="muted" id="txtLightSolidHex">#e3f2fd</span></span></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-typography">
+        <div class="pageHeader">
+          <div>
+            <div class="sectionTitle" contenteditable="true" data-bind="texts.typoLabel">Typographies</div>
+            <div class="kicker" contenteditable="true" data-bind="texts.typoTitle">Système typographique</div>
+          </div>
+          <div class="version" contenteditable="true" data-bind="meta.version">Version 1.01</div>
+        </div>
+
+        <p class="para" contenteditable="true" data-bind="texts.typoIntro">
+          Décrivez l'intention typographique : hiérarchie, usage titres/corps, et justification des familles.
+        </p>
+
+        <div class="typoGrid">
+          <div class="typoCard">
+            <div class="badge" contenteditable="true" data-bind="texts.typoPrimaryLabel">Typographie principale</div>
+            <div class="typoSample" id="typoPrimarySample">Aa</div>
+            <div class="hint muted" style="margin-bottom:10px" id="typoPrimaryName">—</div>
+            <div class="typoLines" contenteditable="true" data-bind="typography.primarySample">
+abcdefghijklmnopqrstuvwxyz
+abcdefghijklmnopqrstuvwxyz
+0123456789!@£$%^&*()_+[]“‘{}«\
+            </div>
+          </div>
+          <div class="typoCard">
+            <div class="badge" contenteditable="true" data-bind="texts.typoSecondaryLabel">Typographie secondaire</div>
+            <div class="typoSample" id="typoSecondarySample">Aa</div>
+            <div class="hint muted" style="margin-bottom:10px" id="typoSecondaryName">—</div>
+            <div class="typoLines" contenteditable="true" data-bind="typography.secondarySample">
+abcdefghijklmnopqrstuvwxyz
+abcdefghijklmnopqrstuvwxyz
+0123456789!@£$%^&*()_+[]“‘{}«\
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-moodboard">
+        <div class="pageHeader">
+          <div>
+            <div class="sectionTitle" contenteditable="true" data-bind="texts.moodLabel">Moodboard</div>
+            <div class="kicker" contenteditable="true" data-bind="texts.moodTitle">Références visuelles</div>
+          </div>
+          <div class="version" contenteditable="true" data-bind="meta.version">Version 1.01</div>
+        </div>
+
+        <p class="para" contenteditable="true" data-bind="texts.moodIntro">
+          Ajoutez ici des images de référence (matières, ambiances, compositions) pour cadrer le style visuel.
+        </p>
+
+        <div class="moodGrid" id="moodGrid"></div>
+
+        <div class="hint" style="margin-top:10px">Astuce : survolez une image pour afficher les actions (supprimer, déplacer).</div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    (function(){
+      "use strict";
+
+      const DEFAULT_STATE = {
+        meta: { version: "Version 1.01" },
+        brand: { name: "Flowless", tagline: "Précision et attention au détail" },
+        logo: { dataUrl: "", mime: "" },
+        colors: {
+          primary: { name: "Bleu nuit", solid: "#0A1929", variants: ["#274359"] },
+          accent:  { name: "Cuivré",   solid: "#c77a3d", variants: ["#D4A574", "#a0522d"] },
+          light:   { name: "Bleu givré", solid: "#e3f2fd", variants: ["#ffffff"] },
+          _autoPalette: []
+        },
+        typography: {
+          primaryFont: "ui-serif, Georgia, 'Times New Roman', Times, serif",
+          secondaryFont: "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif",
+          primarySample: "abcdefghijklmnopqrstuvwxyz\nabcdefghijklmnopqrstuvwxyz\n0123456789!@£$%^&*()_+[]“‘{}«\\",
+          secondarySample: "abcdefghijklmnopqrstuvwxyz\nabcdefghijklmnopqrstuvwxyz\n0123456789!@£$%^&*()_+[]“‘{}«\\"
+        },
+        texts: {
+          coverTitle: "Charte graphique",
+          coverSubtitle: "Document généré depuis un modèle éditable.",
+          indexTitle: "Index",
+          indexItem1: "Présentation",
+          indexItem2: "Logos & déclinaisons",
+          indexItem3: "Couleurs",
+          indexItem4: "Typographies",
+          indexItem5: "Moodboard",
+
+          presentationLabel: "présentation",
+          presentationBody: "Décrivez ici l'intention de la marque, son positionnement, et les principes directeurs de l'identité visuelle.",
+
+          logosLabel: "logos & déclinaisons",
+          logoMainTitle: "logo principal",
+          logoDescription: "Le logotype combine autorité et modernité. Décrivez la symbolique des couleurs, le choix typographique, et les règles d'usage.",
+          logoVariantsTitle: "Déclinaisons",
+          logoVariantHint: "Le logo se décline en versions fond sombre et fond clair pour garantir lisibilité et cohérence sur tous les supports.",
+          variantDarkLabel: "Version fond sombre",
+          variantLightLabel: "Version fond clair",
+
+          colorsLabel: "Couleurs",
+          colorsTitle: "Palette chromatique",
+          colorsIntro: "La palette chromatique a été conçue pour communiquer rigueur, excellence et clarté. Ajustez les textes pour refléter votre marque.",
+          primaryExplain: "Le Primary apporte profondeur et autorité, établissant sérieux et fiabilité.",
+          accentExplain: "L'Accent introduit chaleur et distinction premium, créant un point de focus.",
+          lightExplain: "Les tons clairs apportent clarté et respiration, améliorant la lisibilité.",
+
+          typoLabel: "Typographies",
+          typoTitle: "Système typographique",
+          typoIntro: "Le système typographique a été conçu pour allier autorité professionnelle et lisibilité optimale. Ajustez les polices et la hiérarchie selon vos besoins.",
+          typoPrimaryLabel: "Typographie principale",
+          typoSecondaryLabel: "Typographie secondaire",
+
+          moodLabel: "Moodboard",
+          moodTitle: "Références visuelles",
+          moodIntro: "Ajoutez des images de référence (matières, ambiances, compositions) pour cadrer le style visuel."
+        },
+        moodboard: []
+      };
+
+      /*** Utilities ***/
+      const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+
+      function deepClone(obj){
+        return JSON.parse(JSON.stringify(obj));
+      }
+
+      function isValidHex(hex){
+        return /^#([0-9a-fA-F]{6})$/.test(hex.trim());
+      }
+
+      function normalizeHex(hex){
+        hex = (hex || "").trim();
+        if(/^#([0-9a-fA-F]{3})$/.test(hex)){
+          const m = hex.slice(1);
+          return "#" + m.split("").map(ch => ch + ch).join("").toLowerCase();
+        }
+        if(isValidHex(hex)) return hex.toLowerCase();
+        return null;
+      }
+
+      function rgbToHex(r,g,b){
+        const to = (v)=> v.toString(16).padStart(2,'0');
+        return `#${to(r)}${to(g)}${to(b)}`;
+      }
+
+      function hexToRgb(hex){
+        hex = normalizeHex(hex);
+        if(!hex) return null;
+        const n = parseInt(hex.slice(1),16);
+        return { r:(n>>16)&255, g:(n>>8)&255, b:n&255 };
+      }
+
+      function rgbToHsl(r,g,b){
+        r/=255; g/=255; b/=255;
+        const max=Math.max(r,g,b), min=Math.min(r,g,b);
+        let h=0,s=0,l=(max+min)/2;
+        const d=max-min;
+        if(d!==0){
+          s = d/(1-Math.abs(2*l-1));
+          switch(max){
+            case r: h = ((g-b)/d) % 6; break;
+            case g: h = (b-r)/d + 2; break;
+            case b: h = (r-g)/d + 4; break;
+          }
+          h *= 60;
+          if(h<0) h += 360;
+        }
+        return {h, s, l};
+      }
+
+      function hslToRgb(h,s,l){
+        const c=(1-Math.abs(2*l-1))*s;
+        const x=c*(1-Math.abs((h/60)%2-1));
+        const m=l-c/2;
+        let r1=0,g1=0,b1=0;
+        if(h>=0 && h<60){ r1=c; g1=x; b1=0; }
+        else if(h<120){ r1=x; g1=c; b1=0; }
+        else if(h<180){ r1=0; g1=c; b1=x; }
+        else if(h<240){ r1=0; g1=x; b1=c; }
+        else if(h<300){ r1=x; g1=0; b1=c; }
+        else { r1=c; g1=0; b1=x; }
+        const r=Math.round((r1+m)*255);
+        const g=Math.round((g1+m)*255);
+        const b=Math.round((b1+m)*255);
+        return {r,g,b};
+      }
+
+      function adjustLightness(hex, delta){
+        const rgb = hexToRgb(hex); if(!rgb) return hex;
+        const hsl = rgbToHsl(rgb.r,rgb.g,rgb.b);
+        const l = clamp(hsl.l + delta, 0, 1);
+        const out = hslToRgb(hsl.h, hsl.s, l);
+        return rgbToHex(out.r,out.g,out.b);
+      }
+
+      function adjustSaturation(hex, factor){
+        const rgb = hexToRgb(hex); if(!rgb) return hex;
+        const hsl = rgbToHsl(rgb.r,rgb.g,rgb.b);
+        const s = clamp(hsl.s * factor, 0, 1);
+        const out = hslToRgb(hsl.h, s, hsl.l);
+        return rgbToHex(out.r,out.g,out.b);
+      }
+
+      function rotateHue(hex, degrees){
+        const rgb = hexToRgb(hex); if(!rgb) return hex;
+        const hsl = rgbToHsl(rgb.r,rgb.g,rgb.b);
+        const h = (hsl.h + degrees) % 360;
+        const out = hslToRgb(h, hsl.s, hsl.l);
+        return rgbToHex(out.r,out.g,out.b);
+      }
+
+      function downloadText(filename, text, mime){
+        const blob = new Blob([text], {type: mime || "text/plain"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      }
+
+      function readFileAsDataUrl(file){
+        return new Promise((resolve,reject)=>{
+          const reader = new FileReader();
+          reader.onerror = ()=> reject(new Error("Lecture fichier impossible"));
+          reader.onload = ()=> resolve(String(reader.result));
+          reader.readAsDataURL(file);
+        });
+      }
+
+      /*** State ***/
+      let state = deepClone(DEFAULT_STATE);
+
+      /*** DOM ***/
+      const $ = (sel, root=document)=> root.querySelector(sel);
+      const $$ = (sel, root=document)=> Array.from(root.querySelectorAll(sel));
+
+      const logoDrop = $("#logoDrop");
+      const logoFile = $("#logoFile");
+      const btnPickLogo = $("#btnPickLogo");
+      const logoStatus = $("#logoStatus");
+
+      const brandName = $("#brandName");
+      const brandTagline = $("#brandTagline");
+
+      const logoImgMain = $("#logoImgMain");
+      const logoImgDark = $("#logoImgDark");
+      const logoImgLight = $("#logoImgLight");
+
+      const moodDrop = $("#moodDrop");
+      const moodFiles = $("#moodFiles");
+      const btnPickMood = $("#btnPickMood");
+      const moodGrid = $("#moodGrid");
+
+      const primaryFont = $("#primaryFont");
+      const secondaryFont = $("#secondaryFont");
+
+      const btnPrint = $("#btnPrint");
+      const btnExport = $("#btnExport");
+      const btnImport = $("#btnImport");
+      const importFile = $("#importFile");
+      const btnReset = $("#btnReset");
+
+      /*** Rendering helpers ***/
+      function setCssVar(name, value){
+        document.documentElement.style.setProperty(name, value);
+      }
+
+      function applyPaletteToCss(){
+        setCssVar('--primary', state.colors.primary.solid);
+        setCssVar('--primary-2', state.colors.primary.variants[0] || adjustLightness(state.colors.primary.solid, 0.12));
+
+        setCssVar('--accent', state.colors.accent.solid);
+        setCssVar('--accent-2', state.colors.accent.variants[0] || adjustLightness(state.colors.accent.solid, 0.18));
+        setCssVar('--accent-3', state.colors.accent.variants[1] || adjustLightness(state.colors.accent.solid, -0.12));
+
+        setCssVar('--light', state.colors.light.solid);
+        setCssVar('--light-2', state.colors.light.variants[0] || '#ffffff');
+
+        // Update hex displays
+        $("#hexPrimarySolid").textContent = state.colors.primary.solid;
+        $("#hexPrimaryVar").textContent = state.colors.primary.variants[0] || '';
+        $("#hexAccentSolid").textContent = state.colors.accent.solid;
+        $("#hexAccentVar1").textContent = state.colors.accent.variants[0] || '';
+        $("#hexAccentVar2").textContent = state.colors.accent.variants[1] || '';
+        $("#hexLightSolid").textContent = state.colors.light.solid;
+        $("#hexLightVar").textContent = state.colors.light.variants[0] || '';
+
+        $("#txtPrimarySolidHex").textContent = state.colors.primary.solid;
+        $("#txtAccentSolidHex").textContent = state.colors.accent.solid;
+        $("#txtLightSolidHex").textContent = state.colors.light.solid;
+      }
+
+      function applyTypographyToCss(){
+        setCssVar('--font-primary', state.typography.primaryFont);
+        setCssVar('--font-secondary', state.typography.secondaryFont);
+
+        $("#typoPrimarySample").style.fontFamily = state.typography.primaryFont;
+        $("#typoSecondarySample").style.fontFamily = state.typography.secondaryFont;
+        $("#typoPrimaryName").textContent = state.typography.primaryFont;
+        $("#typoSecondaryName").textContent = state.typography.secondaryFont;
+
+        // Also apply fonts to key headings
+        $$(".docTitle, .kicker").forEach(el => el.style.fontFamily = state.typography.primaryFont);
+      }
+
+      function applyLogo(){
+        const has = !!state.logo.dataUrl;
+        logoStatus.textContent = has ? "Logo chargé" : "Déposer un logo (PNG/JPG/SVG)";
+        logoImgMain.src = has ? state.logo.dataUrl : "";
+        logoImgDark.src = has ? state.logo.dataUrl : "";
+        logoImgLight.src = has ? state.logo.dataUrl : "";
+        logoImgMain.style.display = has ? "block" : "none";
+        logoImgDark.style.display = has ? "block" : "none";
+        logoImgLight.style.display = has ? "block" : "none";
+      }
+
+      function renderMoodboard(){
+        moodGrid.innerHTML = "";
+        if(!state.moodboard.length){
+          const empty = document.createElement('div');
+          empty.className = 'hint muted';
+          empty.textContent = "Aucune image. Ajoutez-en via le panneau de contrôle.";
+          moodGrid.appendChild(empty);
+          return;
+        }
+        state.moodboard.forEach((src, idx)=>{
+          const wrap = document.createElement('div');
+          wrap.className = 'mood';
+
+          const img = document.createElement('img');
+          img.src = src;
+          img.alt = `Moodboard ${idx+1}`;
+
+          const actions = document.createElement('div');
+          actions.className = 'moodActions';
+
+          const del = document.createElement('button');
+          del.className = 'miniBtn';
+          del.type = 'button';
+          del.textContent = 'Supprimer';
+          del.addEventListener('click', ()=>{
+            state.moodboard.splice(idx,1);
+            renderMoodboard();
+          });
+
+          const up = document.createElement('button');
+          up.className = 'miniBtn';
+          up.type = 'button';
+          up.textContent = '↑';
+          up.disabled = idx===0;
+          up.addEventListener('click', ()=>{
+            if(idx===0) return;
+            const tmp = state.moodboard[idx-1];
+            state.moodboard[idx-1] = state.moodboard[idx];
+            state.moodboard[idx] = tmp;
+            renderMoodboard();
+          });
+
+          const down = document.createElement('button');
+          down.className = 'miniBtn';
+          down.type = 'button';
+          down.textContent = '↓';
+          down.disabled = idx===state.moodboard.length-1;
+          down.addEventListener('click', ()=>{
+            if(idx>=state.moodboard.length-1) return;
+            const tmp = state.moodboard[idx+1];
+            state.moodboard[idx+1] = state.moodboard[idx];
+            state.moodboard[idx] = tmp;
+            renderMoodboard();
+          });
+
+          actions.appendChild(up);
+          actions.appendChild(down);
+          actions.appendChild(del);
+
+          wrap.appendChild(img);
+          wrap.appendChild(actions);
+          moodGrid.appendChild(wrap);
+        });
+      }
+
+      function bindInputsToState(){
+        brandName.value = state.brand.name;
+        brandTagline.value = state.brand.tagline;
+
+        primaryFont.value = state.typography.primaryFont;
+        secondaryFont.value = state.typography.secondaryFont;
+
+        // Palette controls
+        $$(".swatchRow").forEach(row => {
+          const family = row.getAttribute('data-family');
+          const obj = state.colors[family];
+
+          const name = $("[data-role='name']", row);
+          const solidPicker = $("[data-role='solidPicker']", row);
+          const solidHex = $("[data-role='solidHex']", row);
+          const v1Picker = $("[data-role='v1Picker']", row);
+          const v1Hex = $("[data-role='v1Hex']", row);
+          const v2Picker = $("[data-role='v2Picker']", row);
+          const v2Hex = $("[data-role='v2Hex']", row);
+          const dot = $("[data-role='dot']", row);
+
+          name.value = obj.name;
+          solidPicker.value = obj.solid;
+          solidHex.value = obj.solid;
+
+          if(v1Picker){
+            const v = obj.variants[0] || adjustLightness(obj.solid, 0.14);
+            v1Picker.value = v;
+            v1Hex.value = v;
+          }
+          if(v2Picker){
+            const v = obj.variants[1] || adjustLightness(obj.solid, -0.10);
+            v2Picker.value = v;
+            v2Hex.value = v;
+          }
+          if(dot) dot.style.background = obj.solid;
+        });
+      }
+
+      function hydrateEditableFields(){
+        // Update any preview elements bound via data-bind
+        $$("[data-bind]").forEach(el => {
+          const path = el.getAttribute('data-bind');
+          const val = getByPath(state, path);
+          if(typeof val === 'string'){
+            if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.value = val;
+            else el.textContent = val;
+          }
+        });
+
+        // Named color badges
+        $("#badgePrimaryName").textContent = state.colors.primary.name;
+        $("#badgeAccentName").textContent = state.colors.accent.name;
+        $("#badgeLightName").textContent = state.colors.light.name;
+      }
+
+      function getByPath(obj, path){
+        return path.split('.').reduce((acc, key)=> (acc && acc[key] !== undefined) ? acc[key] : undefined, obj);
+      }
+
+      function setByPath(obj, path, value){
+        const keys = path.split('.');
+        const last = keys.pop();
+        const parent = keys.reduce((acc, key)=>{
+          if(acc[key] === undefined) acc[key] = {};
+          return acc[key];
+        }, obj);
+        parent[last] = value;
+      }
+
+      function renderAll(){
+        // Brand fields
+        $("#brandName").value = state.brand.name;
+        $("#brandTagline").value = state.brand.tagline;
+
+        // Update bound text fields in preview
+        hydrateEditableFields();
+
+        // Palette & typography
+        applyPaletteToCss();
+        applyTypographyToCss();
+
+        // Logo & moodboard
+        applyLogo();
+        renderMoodboard();
+
+        // Update palette controls (inputs reflect current state)
+        bindInputsToState();
+      }
+
+      /*** Color extraction (no deps) ***/
+      async function extractPaletteFromDataUrl(dataUrl){
+        // Load image
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        const loaded = new Promise((resolve,reject)=>{
+          img.onload = ()=> resolve();
+          img.onerror = ()=> reject(new Error('Impossible de charger l\'image pour extraction.'));
+        });
+        img.src = dataUrl;
+        await loaded;
+
+        // Downscale
+        const maxSide = 220;
+        const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+        const w = Math.max(1, Math.round(img.width * scale));
+        const h = Math.max(1, Math.round(img.height * scale));
+
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        ctx.drawImage(img, 0, 0, w, h);
+
+        const { data } = ctx.getImageData(0,0,w,h);
+        const step = 5; // sample every Nth pixel for speed
+
+        const buckets = new Map();
+        const bucketSize = 32; // quantization step (0..255)
+
+        function keyFor(r,g,b){
+          const qr = Math.round(r / bucketSize) * bucketSize;
+          const qg = Math.round(g / bucketSize) * bucketSize;
+          const qb = Math.round(b / bucketSize) * bucketSize;
+          return `${qr},${qg},${qb}`;
+        }
+
+        for(let y=0; y<h; y+=step){
+          for(let x=0; x<w; x+=step){
+            const i = (y*w + x) * 4;
+            const r = data[i], g = data[i+1], b = data[i+2], a = data[i+3];
+            if(a < 24) continue;
+
+            const hsl = rgbToHsl(r,g,b);
+            // ignore extreme whites/blacks unless image is very monochrome
+            if(hsl.l > 0.985 || hsl.l < 0.02) continue;
+
+            const k = keyFor(r,g,b);
+            buckets.set(k, (buckets.get(k) || 0) + 1);
+          }
+        }
+
+        // If everything filtered out (e.g., mostly white/black logo), relax thresholds
+        if(buckets.size < 3){
+          buckets.clear();
+          for(let y=0; y<h; y+=step){
+            for(let x=0; x<w; x+=step){
+              const i = (y*w + x) * 4;
+              const r = data[i], g = data[i+1], b = data[i+2], a = data[i+3];
+              if(a < 24) continue;
+              const k = keyFor(r,g,b);
+              buckets.set(k, (buckets.get(k) || 0) + 1);
+            }
+          }
+        }
+
+        const top = Array.from(buckets.entries())
+          .sort((a,b)=> b[1]-a[1])
+          .slice(0, 10)
+          .map(([k, count])=>{
+            const [r,g,b] = k.split(',').map(n=>parseInt(n,10));
+            const hsl = rgbToHsl(r,g,b);
+            return { hex: rgbToHex(r,g,b), count, hsl };
+          });
+
+        // Reduce near-duplicates by hue/lightness proximity
+        const dedup = [];
+        for(const c of top){
+          const tooClose = dedup.some(d => {
+            const dh = Math.min(Math.abs(d.hsl.h - c.hsl.h), 360 - Math.abs(d.hsl.h - c.hsl.h));
+            const dl = Math.abs(d.hsl.l - c.hsl.l);
+            return dh < 10 && dl < 0.06;
+          });
+          if(!tooClose) dedup.push(c);
+        }
+
+        // Sort candidates
+        const byDark = [...dedup].sort((a,b)=> a.hsl.l - b.hsl.l);
+        const byLight = [...dedup].sort((a,b)=> b.hsl.l - a.hsl.l);
+        const bySaturation = [...dedup].sort((a,b)=> b.hsl.s - a.hsl.s);
+
+        let primary = byDark[0]?.hex || "#0A1929";
+        let light = byLight[0]?.hex || "#e3f2fd";
+
+        // Accent: prefer high saturation but not too dark or too light
+        let accent = null;
+        for(const c of bySaturation){
+          if(c.hex === primary || c.hex === light) continue;
+          if(c.hsl.l > 0.12 && c.hsl.l < 0.82){
+            accent = c.hex;
+            break;
+          }
+        }
+        accent = accent || rotateHue(primary, 35);
+        accent = adjustSaturation(accent, 1.15);
+
+        // Ensure contrast separation
+        if(Math.abs(rgbToHsl(...Object.values(hexToRgb(primary))).l - rgbToHsl(...Object.values(hexToRgb(light))).l) < 0.35){
+          light = "#ffffff";
+        }
+
+        return {
+          primary,
+          accent,
+          light,
+          candidates: dedup.map(x=>x.hex)
+        };
+      }
+
+      function buildVariants(family, solid){
+        // Heuristics tuned to match typical brand palettes
+        if(family === 'primary'){
+          const v1 = adjustLightness(adjustSaturation(solid, 0.92), 0.16);
+          return [v1];
+        }
+        if(family === 'accent'){
+          const v1 = adjustLightness(adjustSaturation(solid, 0.88), 0.18);
+          const v2 = adjustLightness(adjustSaturation(solid, 1.05), -0.16);
+          return [v1, v2];
+        }
+        if(family === 'light'){
+          const v1 = "#ffffff";
+          return [v1];
+        }
+        return [];
+      }
+
+      function applyAutoPalette(p){
+        state.colors._autoPalette = p.candidates || [];
+
+        state.colors.primary.solid = normalizeHex(p.primary) || state.colors.primary.solid;
+        state.colors.primary.variants = buildVariants('primary', state.colors.primary.solid);
+
+        state.colors.accent.solid = normalizeHex(p.accent) || state.colors.accent.solid;
+        state.colors.accent.variants = buildVariants('accent', state.colors.accent.solid);
+
+        state.colors.light.solid = normalizeHex(p.light) || state.colors.light.solid;
+        state.colors.light.variants = buildVariants('light', state.colors.light.solid);
+      }
+
+      /*** Event wiring ***/
+      function wireDragAndDrop(dropEl, onFiles){
+        const stop = (e)=>{ e.preventDefault(); e.stopPropagation(); };
+
+        ['dragenter','dragover'].forEach(ev=>{
+          dropEl.addEventListener(ev, (e)=>{ stop(e); dropEl.classList.add('dragover'); });
+        });
+        ['dragleave','drop'].forEach(ev=>{
+          dropEl.addEventListener(ev, (e)=>{ stop(e); dropEl.classList.remove('dragover'); });
+        });
+        dropEl.addEventListener('drop', (e)=>{
+          const files = Array.from(e.dataTransfer.files || []);
+          if(files.length) onFiles(files);
+        });
+      }
+
+      async function handleLogoFile(file){
+        if(!file) return;
+        const ok = ["image/png","image/jpeg","image/svg+xml"].includes(file.type);
+        if(!ok){
+          alert("Format non supporté. Utilisez PNG, JPG ou SVG.");
+          return;
+        }
+        const dataUrl = await readFileAsDataUrl(file);
+        state.logo.dataUrl = dataUrl;
+        state.logo.mime = file.type;
+        applyLogo();
+
+        // Try palette extraction on rasterizable content
+        try{
+          const pal = await extractPaletteFromDataUrl(dataUrl);
+          applyAutoPalette(pal);
+          renderAll();
+        }catch(err){
+          console.warn(err);
+          renderAll();
+        }
+      }
+
+      async function handleMoodFiles(files){
+        const imgs = files.filter(f => /^image\//.test(f.type));
+        if(!imgs.length) return;
+        for(const f of imgs){
+          try{
+            const url = await readFileAsDataUrl(f);
+            state.moodboard.push(url);
+          }catch(e){
+            console.warn(e);
+          }
+        }
+        renderMoodboard();
+      }
+
+      function wirePaletteControls(){
+        $$(".swatchRow").forEach(row => {
+          const family = row.getAttribute('data-family');
+
+          const name = $("[data-role='name']", row);
+          const solidPicker = $("[data-role='solidPicker']", row);
+          const solidHex = $("[data-role='solidHex']", row);
+          const v1Picker = $("[data-role='v1Picker']", row);
+          const v1Hex = $("[data-role='v1Hex']", row);
+          const v2Picker = $("[data-role='v2Picker']", row);
+          const v2Hex = $("[data-role='v2Hex']", row);
+          const autoBtn = $("[data-action='auto']", row);
+
+          function commit(){
+            // Name
+            state.colors[family].name = name.value.trim() || state.colors[family].name;
+
+            // Solid
+            const solid = normalizeHex(solidHex.value) || normalizeHex(solidPicker.value);
+            if(solid){
+              state.colors[family].solid = solid;
+            }
+
+            // Variants
+            const variants = [];
+            if(v1Hex){
+              const v1 = normalizeHex(v1Hex.value) || normalizeHex(v1Picker.value);
+              if(v1) variants.push(v1);
+            }
+            if(v2Hex){
+              const v2 = normalizeHex(v2Hex.value) || normalizeHex(v2Picker.value);
+              if(v2) variants.push(v2);
+            }
+            state.colors[family].variants = variants;
+
+            // Re-render palette
+            applyPaletteToCss();
+            hydrateEditableFields();
+            bindInputsToState();
+          }
+
+          name.addEventListener('input', commit);
+
+          function linkPickerToHex(picker, hexInput){
+            if(!picker || !hexInput) return;
+            picker.addEventListener('input', ()=>{ hexInput.value = picker.value; commit(); });
+            hexInput.addEventListener('input', ()=>{
+              const n = normalizeHex(hexInput.value);
+              if(n) picker.value = n;
+              commit();
+            });
+          }
+
+          linkPickerToHex(solidPicker, solidHex);
+          linkPickerToHex(v1Picker, v1Hex);
+          linkPickerToHex(v2Picker, v2Hex);
+
+          if(autoBtn){
+            autoBtn.addEventListener('click', ()=>{
+              // Recompute variants from current solid
+              const solid = state.colors[family].solid;
+              state.colors[family].variants = buildVariants(family, solid);
+              renderAll();
+            });
+          }
+        });
+      }
+
+      function wireContentEditable(){
+        // Any element with data-bind is editable if contenteditable=true
+        $$("[contenteditable='true'][data-bind]").forEach(el => {
+          el.addEventListener('input', ()=>{
+            const path = el.getAttribute('data-bind');
+            setByPath(state, path, el.textContent);
+
+            // mirror some fields
+            if(path === 'brand.tagline'){
+              state.brand.tagline = el.textContent;
+              brandTagline.value = state.brand.tagline;
+            }
+            if(path === 'meta.version'){
+              state.meta.version = el.textContent;
+              // update all version nodes
+              $$("[data-bind='meta.version']").forEach(n => { if(n!==el) n.textContent = el.textContent; });
+            }
+
+            // Update named badges if needed
+            if(path === 'colors.primary.name') $("#badgePrimaryName").textContent = el.textContent;
+            if(path === 'colors.accent.name') $("#badgeAccentName").textContent = el.textContent;
+            if(path === 'colors.light.name') $("#badgeLightName").textContent = el.textContent;
+          });
+        });
+      }
+
+      function wireBrandInputs(){
+        brandName.addEventListener('input', ()=>{
+          state.brand.name = brandName.value;
+        });
+        brandTagline.addEventListener('input', ()=>{
+          state.brand.tagline = brandTagline.value;
+          // sync preview tagline
+          const el = $("[data-bind='brand.tagline']");
+          if(el) el.textContent = state.brand.tagline;
+        });
+      }
+
+      function wireTypographyInputs(){
+        primaryFont.addEventListener('input', ()=>{
+          state.typography.primaryFont = primaryFont.value || DEFAULT_STATE.typography.primaryFont;
+          applyTypographyToCss();
+        });
+        secondaryFont.addEventListener('input', ()=>{
+          state.typography.secondaryFont = secondaryFont.value || DEFAULT_STATE.typography.secondaryFont;
+          applyTypographyToCss();
+        });
+
+        // Bind samples (contenteditable)
+        const pSample = $("[data-bind='typography.primarySample']");
+        const sSample = $("[data-bind='typography.secondarySample']");
+        pSample.addEventListener('input', ()=>{ state.typography.primarySample = pSample.textContent; });
+        sSample.addEventListener('input', ()=>{ state.typography.secondarySample = sSample.textContent; });
+      }
+
+      function wireActions(){
+        btnPickLogo.addEventListener('click', ()=> logoFile.click());
+        logoFile.addEventListener('change', ()=>{
+          const f = logoFile.files && logoFile.files[0];
+          if(f) handleLogoFile(f);
+          logoFile.value = "";
+        });
+
+        wireDragAndDrop(logoDrop, (files)=>{
+          const f = files[0];
+          if(f) handleLogoFile(f);
+        });
+
+        btnPickMood.addEventListener('click', ()=> moodFiles.click());
+        moodFiles.addEventListener('change', ()=>{
+          const files = Array.from(moodFiles.files || []);
+          handleMoodFiles(files);
+          moodFiles.value = "";
+        });
+        wireDragAndDrop(moodDrop, handleMoodFiles);
+
+        btnPrint.addEventListener('click', ()=> window.print());
+
+        btnExport.addEventListener('click', ()=>{
+          downloadText('charte.json', JSON.stringify(state, null, 2), 'application/json');
+        });
+
+        btnImport.addEventListener('click', ()=> importFile.click());
+        importFile.addEventListener('change', async ()=>{
+          const f = importFile.files && importFile.files[0];
+          if(!f) return;
+          try{
+            const txt = await f.text();
+            const obj = JSON.parse(txt);
+            // Minimal validation
+            if(!obj || typeof obj !== 'object') throw new Error('JSON invalide');
+            state = obj;
+            // Backfill missing keys
+            state.meta = state.meta || deepClone(DEFAULT_STATE.meta);
+            state.brand = state.brand || deepClone(DEFAULT_STATE.brand);
+            state.colors = state.colors || deepClone(DEFAULT_STATE.colors);
+            state.typography = state.typography || deepClone(DEFAULT_STATE.typography);
+            state.texts = state.texts || deepClone(DEFAULT_STATE.texts);
+            state.moodboard = state.moodboard || [];
+            state.logo = state.logo || {dataUrl:"", mime:""};
+            renderAll();
+          }catch(e){
+            alert('Import impossible : ' + (e && e.message ? e.message : 'erreur')); 
+          }finally{
+            importFile.value = "";
+          }
+        });
+
+        btnReset.addEventListener('click', ()=>{
+          if(!confirm('Réinitialiser la charte ?')) return;
+          state = deepClone(DEFAULT_STATE);
+          renderAll();
+        });
+      }
+
+      /*** Init ***/
+      function init(){
+        // Seed inputs
+        brandName.value = state.brand.name;
+        brandTagline.value = state.brand.tagline;
+        primaryFont.value = state.typography.primaryFont;
+        secondaryFont.value = state.typography.secondaryFont;
+
+        wireBrandInputs();
+        wirePaletteControls();
+        wireContentEditable();
+        wireTypographyInputs();
+        wireActions();
+
+        renderAll();
+
+        // If no logo, show subtle placeholders
+        if(!state.logo.dataUrl){
+          // keep empty; nothing to do
+        }
+      }
+
+      init();
+
+    })();
+  </script>
+</body>
+</html>
