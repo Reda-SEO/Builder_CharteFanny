@@ -41,9 +41,6 @@
       background: radial-gradient(1200px 700px at 10% 10%, rgba(199,122,61,.14), transparent 55%),
                   radial-gradient(900px 600px at 90% 0%, rgba(39,67,89,.22), transparent 55%),
                   var(--bg);
-      background-repeat: no-repeat;
-      background-size: cover;
-      background-attachment: fixed;
     }
 
     a{color:inherit}
@@ -202,7 +199,6 @@
       border-radius: var(--radius-lg);
       box-shadow: 0 18px 42px var(--shadow);
       padding: 22px;
-      position: relative;
     }
 
     .pageHeader{
@@ -367,8 +363,6 @@
       font-size: 22px;
       margin: 6px 0 10px;
     }
-    .typoCard:nth-child(1) .typoSample, .typoCard:nth-child(1) .typoLines{font-family: var(--font-primary)}
-    .typoCard:nth-child(2) .typoSample, .typoCard:nth-child(2) .typoLines{font-family: var(--font-secondary)}
 
     .typoLines{
       font-size: 13px;
@@ -442,7 +436,6 @@
 
     /* Print */
     @media print{
-      .dragHandle{display:none !important}
       :root{ --bg:#ffffff; --text:#0b0f14; --muted:#3c4a58; --panel:#ffffff; --border:rgba(0,0,0,.12); }
       body{background:#fff}
       .app{display:block}
@@ -556,62 +549,20 @@
         </div>
       </div>
 
-      
-      <div class="card" id="cardTypography">
+      <div class="card">
         <h2>Typographies</h2>
-
         <div class="field">
-          <div class="label">Google Fonts — URL CSS (optionnel)</div>
-          <input class="input" id="googleFontsUrl" type="text" placeholder="Ex. https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" />
-          <div class="hint">Si renseigné, l’outil charge automatiquement la feuille CSS Google Fonts pour permettre l’aperçu (connexion internet requise).</div>
-        </div>
-
-        <div class="field">
-          <div class="label">Typographie principale — Nom de famille (pour aperçu)</div>
-          <input class="input" id="primaryFamily" type="text" placeholder="Ex. Inter" />
+          <div class="label">Typographie principale (nom CSS)</div>
+          <input class="input" id="primaryFont" type="text" placeholder="Ex. ui-serif, Georgia, Times" />
         </div>
         <div class="field">
-          <div class="label">Typographie principale — Fallback CSS</div>
-          <input class="input" id="primaryFallback" type="text" placeholder="Ex. ui-serif, Georgia, 'Times New Roman', Times, serif" />
+          <div class="label">Typographie secondaire (nom CSS)</div>
+          <input class="input" id="secondaryFont" type="text" placeholder="Ex. ui-sans-serif, system-ui" />
         </div>
-        <div class="row" style="justify-content:space-between; margin-top:8px">
-          <input class="input" id="primaryFont" type="text" placeholder="Ou collez ici une stack complète (CSS font-family)" style="flex:1" />
-          <input class="input" id="primaryFontFile" type="file" accept=".woff,.woff2,.ttf,.otf" style="width:170px" />
-        </div>
-        <div class="hint">Optionnel : chargez un fichier de font (woff/woff2/ttf/otf). Le fichier est stocké dans le JSON exporté (peut l’alourdir).</div>
-
-        <div style="height:10px"></div>
-
-        <div class="field">
-          <div class="label">Typographie secondaire — Nom de famille (pour aperçu)</div>
-          <input class="input" id="secondaryFamily" type="text" placeholder="Ex. Figtree" />
-        </div>
-        <div class="field">
-          <div class="label">Typographie secondaire — Fallback CSS</div>
-          <input class="input" id="secondaryFallback" type="text" placeholder="Ex. ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif" />
-        </div>
-        <div class="row" style="justify-content:space-between; margin-top:8px">
-          <input class="input" id="secondaryFont" type="text" placeholder="Ou collez ici une stack complète (CSS font-family)" style="flex:1" />
-          <input class="input" id="secondaryFontFile" type="file" accept=".woff,.woff2,.ttf,.otf" style="width:170px" />
-        </div>
-
-        <div class="row" style="justify-content:flex-end; margin-top:10px">
-          <button class="btn" type="button" id="btnApplyFonts">Appliquer</button>
-        </div>
-        <div class="hint">Le bouton “Appliquer” met à jour l’aperçu. En cas d’échec de chargement, l’outil retombe sur les fallbacks.</div>
-      </div>
-
-      <div class="card" id="cardSections">
-        <h2>Sections</h2>
-        <div class="hint">Ajoutez des sections supplémentaires librement. Elles apparaissent dans l’Index et comme une nouvelle “page” dans l’aperçu.</div>
-        <div class="btns" style="margin-top:10px">
-          <button class="btn" type="button" id="btnAddSection">Ajouter une section</button>
-        </div>
-        <div id="sectionsList" style="margin-top:10px"></div>
+        <div class="hint">Cette version n'embarque pas de fichiers de fonts. Vous pouvez renseigner des polices disponibles sur le poste ou gérer un @font-face en V2.</div>
       </div>
 
       <div class="card" id="cardMood">
-
         <h2>Moodboard</h2>
         <div class="drop" id="moodDrop" tabindex="0" role="button" aria-label="Déposer des images moodboard">
           <div class="row" style="justify-content:space-between; gap:12px;">
@@ -630,8 +581,7 @@
       <div class="card">
         <h2>Actions</h2>
         <div class="btns">
-          <button class="btn" id="btnPrint" type="button">Imprimer</button>
-          <button class="btn" id="btnExportHTML" type="button">Export HTML</button>
+          <button class="btn primary" id="btnPrint" type="button">Imprimer</button>
           <button class="btn" id="btnExport" type="button">Exporter JSON</button>
           <button class="btn" id="btnImport" type="button">Importer JSON</button>
           <input id="importFile" type="file" accept="application/json" hidden>
@@ -671,7 +621,13 @@
           <div class="version" contenteditable="true" data-bind="meta.version">Version 1.01</div>
         </div>
 
-        <div class="indexList" id="indexList"></div>
+        <div class="indexList">
+          <a class="indexItem" href="#page-presentation"><span contenteditable="true" data-bind="texts.indexItem1">Présentation</span><span class="muted">2</span></a>
+          <a class="indexItem" href="#page-logos"><span contenteditable="true" data-bind="texts.indexItem2">Logos & déclinaisons</span><span class="muted">3</span></a>
+          <a class="indexItem" href="#page-colors"><span contenteditable="true" data-bind="texts.indexItem3">Couleurs</span><span class="muted">5</span></a>
+          <a class="indexItem" href="#page-typography"><span contenteditable="true" data-bind="texts.indexItem4">Typographies</span><span class="muted">6</span></a>
+          <a class="indexItem" href="#page-moodboard"><span contenteditable="true" data-bind="texts.indexItem5">Moodboard</span><span class="muted">8</span></a>
+        </div>
       </section>
 
       <section class="page" id="page-presentation">
@@ -853,8 +809,6 @@ abcdefghijklmnopqrstuvwxyz
         </div>
       </section>
 
-      <div id="customPagesMount"></div>
-
       <section class="page" id="page-moodboard">
         <div class="pageHeader">
           <div>
@@ -882,7 +836,6 @@ abcdefghijklmnopqrstuvwxyz
       const DEFAULT_STATE = {
         meta: { version: "Version 1.01" },
         brand: { name: "Flowless", tagline: "Précision et attention au détail" },
-        customSections: [],
         logo: { dataUrl: "", mime: "" },
         colors: {
           primary: { name: "Bleu nuit", solid: "#0A1929", variants: ["#274359"] },
@@ -1041,299 +994,6 @@ abcdefghijklmnopqrstuvwxyz
         URL.revokeObjectURL(url);
       }
 
-      async function downloadPdf(){
-        try{
-          const pages = Array.from(document.querySelectorAll('.page'));
-          if(!pages.length){
-            alert("Aucune page à exporter.");
-            return;
-          }
-
-          // Gather CSS to ensure the SVG foreignObject can render with the same styles
-          const cssText = Array.from(document.querySelectorAll('style'))
-            .map(s => s.textContent || "")
-            .join("\n");
-
-          const images = [];
-          const pageSizes = [];
-
-          for(const page of pages){
-            const {dataUrl, widthPx, heightPx} = await renderElementToJpegDataUrl(page, cssText);
-            images.push(dataUrl);
-            // Convert px to PDF points (72pt/in) assuming CSS pixel density ~96dpi
-            const wPt = widthPx * 72 / 96;
-            const hPt = heightPx * 72 / 96;
-            pageSizes.push({wPt, hPt});
-          }
-
-          const pdfBytes = buildPdfFromJpegs(images, pageSizes);
-          const blob = new Blob([pdfBytes], {type: 'application/pdf'});
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = 'charte.pdf';
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          URL.revokeObjectURL(url);
-        }catch(e){
-          console.error(e);
-          alert("Impossible de générer le PDF dans ce navigateur. Essayez Chrome/Edge, ou utilisez l'impression PDF.");
-        }
-      }
-
-      function svgFromElement(el, cssText, widthPx, heightPx){
-        const clone = el.cloneNode(true);
-        // Ensure editable focus outlines etc. are removed in export
-        clone.querySelectorAll('[contenteditable="true"]').forEach(n => n.removeAttribute('data-placeholder'));
-
-        const serialized = new XMLSerializer().serializeToString(clone);
-
-        return `
-<svg xmlns="http://www.w3.org/2000/svg" width="${widthPx}" height="${heightPx}">
-  <foreignObject x="0" y="0" width="100%" height="100%">
-    <div xmlns="http://www.w3.org/1999/xhtml">
-      <style>${cssText}</style>
-      ${serialized}
-    </div>
-  </foreignObject>
-</svg>`;
-      }
-
-      function loadImage(src){
-        return new Promise((resolve, reject)=>{
-          const img = new Image();
-          img.onload = ()=> resolve(img);
-          img.onerror = reject;
-          img.src = src;
-        });
-      }
-
-      async function renderElementToJpegDataUrl(el, cssText){
-        const rect = el.getBoundingClientRect();
-        const widthPx = Math.max(1, Math.round(rect.width));
-        const heightPx = Math.max(1, Math.round(rect.height));
-
-        const svg = svgFromElement(el, cssText, widthPx, heightPx);
-        const svgBlob = new Blob([svg], {type: 'image/svg+xml;charset=utf-8'});
-        const svgUrl = URL.createObjectURL(svgBlob);
-
-        const img = await loadImage(svgUrl);
-        URL.revokeObjectURL(svgUrl);
-
-        const canvas = document.createElement('canvas');
-        // Scale up for better quality
-        const scale = 2;
-        canvas.width = widthPx * scale;
-        canvas.height = heightPx * scale;
-        const ctx = canvas.getContext('2d');
-        ctx.scale(scale, scale);
-        // White background
-        ctx.fillRect(0, 0, widthPx, heightPx);
-        ctx.drawImage(img, 0, 0, widthPx, heightPx);
-
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
-        return {dataUrl, widthPx, heightPx};
-      }
-
-      function base64ToUint8Array(base64){
-        const binStr = atob(base64);
-        const len = binStr.length;
-        const bytes = new Uint8Array(len);
-        for(let i=0;i<len;i++) bytes[i] = binStr.charCodeAt(i);
-        return bytes;
-      }
-
-      function buildPdfFromJpegs(jpegDataUrls, pageSizes){
-        // Minimal PDF (image-per-page) builder with DCTDecode images
-        // References: PDF 1.4 basics: Catalog -> Pages -> Page -> XObject Image
-        const objects = [];
-        const offsets = [];
-        const encoder = new TextEncoder();
-
-        function addObject(strOrBytes){
-          objects.push(strOrBytes);
-          return objects.length; // 1-based id
-        }
-
-        // Placeholder; will be filled later
-        const pagesKids = [];
-
-        // Add image objects and page objects
-        for(let i=0;i<jpegDataUrls.length;i++){
-          const dataUrl = jpegDataUrls[i];
-          const base64 = dataUrl.split(',')[1] || "";
-          const imgBytes = base64ToUint8Array(base64);
-
-          // Image object
-          const imgObjId = addObject({
-            type: 'stream',
-            dict: `<< /Type /XObject /Subtype /Image /Filter /DCTDecode /ColorSpace /DeviceRGB /BitsPerComponent 8 /Width 1000 /Height 1000 >>`,
-            bytes: imgBytes,
-            // We'll replace Width/Height later using page pixel ratio; easiest: set at render time
-          });
-
-          // We need accurate width/height in pixels for the XObject
-          // Extract from JPEG header is possible, but simpler: use the canvas dims via pageSizes + dpi assumption
-          // We instead embed an explicit size in the page content, so XObject width/height can be any
-          // However PDF viewers may rely on it; better set approximate:
-          const {wPt, hPt} = pageSizes[i];
-          const wPx = Math.round(wPt * 96 / 72);
-          const hPx = Math.round(hPt * 96 / 72);
-          // patch dict
-          objects[imgObjId-1].dict = `<< /Type /XObject /Subtype /Image /Filter /DCTDecode /ColorSpace /DeviceRGB /BitsPerComponent 8 /Width ${wPx*2} /Height ${hPx*2} >>`;
-
-          // Content stream draws image to fill the page
-          const content = `q\n${wPt} 0 0 ${hPt} 0 0 cm\n/Im${i+1} Do\nQ\n`;
-          const contentObjId = addObject({
-            type: 'stream',
-            dict: `<< /Length ${encoder.encode(content).length} >>`,
-            bytes: encoder.encode(content)
-          });
-
-          // Page object
-          const pageObjId = addObject(
-            `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${wPt.toFixed(2)} ${hPt.toFixed(2)}] /Resources << /XObject << /Im${i+1} ${imgObjId} 0 R >> >> /Contents ${contentObjId} 0 R >>`
-          );
-          pagesKids.push(pageObjId);
-        }
-
-        // Pages object (id 2)
-        const pagesObjId = addObject(
-          `<< /Type /Pages /Kids [${pagesKids.map(id=>`${id} 0 R`).join(' ')}] /Count ${pagesKids.length} >>`
-        );
-
-        // Catalog object (id 1) – must point to Pages
-        const catalogObjId = addObject(`<< /Type /Catalog /Pages ${pagesObjId} 0 R >>`);
-
-        // Now write PDF with proper ordering: catalog should be 1, pages 2, others after.
-        // Our addObject order currently is: images/pages/content... then pages then catalog.
-        // So we need reorder to ensure IDs match references. Simplest: rebuild with fixed IDs.
-        // We'll rebuild properly.
-        return buildPdfFromObjectsFixed(jpegDataUrls, pageSizes);
-      }
-
-      function buildPdfFromObjectsFixed(jpegDataUrls, pageSizes){
-        const encoder = new TextEncoder();
-        const chunks = [];
-        const offsets = [0]; // xref requires object offsets; index 0 is unused
-        let offset = 0;
-
-        function pushBytes(u8){
-          chunks.push(u8);
-          offset += u8.length;
-        }
-        function pushStr(s){
-          const u8 = encoder.encode(s);
-          pushBytes(u8);
-        }
-
-        // Header
-        pushStr('%PDF-1.4\n%1234\n');
-
-        const objCount = 2 + jpegDataUrls.length * 3; // catalog + pages + (img + content + page)*n
-        const catalogId = 1;
-        const pagesId = 2;
-
-        // We'll allocate IDs:
-        // For each page i:
-        // imgId = 3 + i*3
-        // contentId = 4 + i*3
-        // pageId = 5 + i*3
-        function imgId(i){ return 3 + i*3; }
-        function contentId(i){ return 4 + i*3; }
-        function pageId(i){ return 5 + i*3; }
-
-        // Helper to write objects
-        function beginObj(id){
-          offsets[id] = offset;
-          pushStr(`${id} 0 obj\n`);
-        }
-        function endObj(){
-          pushStr('endobj\n');
-        }
-
-        // 1) Catalog
-        beginObj(catalogId);
-        pushStr(`<< /Type /Catalog /Pages ${pagesId} 0 R >>\n`);
-        endObj();
-
-        // 2) Pages
-        beginObj(pagesId);
-        const kids = jpegDataUrls.map((_,i)=>`${pageId(i)} 0 R`).join(' ');
-        pushStr(`<< /Type /Pages /Kids [${kids}] /Count ${jpegDataUrls.length} >>\n`);
-        endObj();
-
-        // 3) Per-page objects
-        for(let i=0;i<jpegDataUrls.length;i++){
-          const dataUrl = jpegDataUrls[i];
-          const base64 = dataUrl.split(',')[1] || "";
-          const imgBytes = (function(){
-            const binStr = atob(base64);
-            const len = binStr.length;
-            const bytes = new Uint8Array(len);
-            for(let k=0;k<len;k++) bytes[k]=binStr.charCodeAt(k);
-            return bytes;
-          })();
-
-          const {wPt, hPt} = pageSizes[i];
-          const wPx = Math.round(wPt * 96 / 72);
-          const hPx = Math.round(hPt * 96 / 72);
-          const imgW = wPx * 2; // scale=2 used in render
-          const imgH = hPx * 2;
-
-          // Image XObject
-          beginObj(imgId(i));
-          pushStr(`<< /Type /XObject /Subtype /Image /Filter /DCTDecode /ColorSpace /DeviceRGB /BitsPerComponent 8 /Width ${imgW} /Height ${imgH} /Length ${imgBytes.length} >>\nstream\n`);
-          pushBytes(imgBytes);
-          pushStr('\nendstream\n');
-          endObj();
-
-          // Content stream
-          const content = `q\n${wPt.toFixed(2)} 0 0 ${hPt.toFixed(2)} 0 0 cm\n/Im${i+1} Do\nQ\n`;
-          const contentBytes = encoder.encode(content);
-          beginObj(contentId(i));
-          pushStr(`<< /Length ${contentBytes.length} >>\nstream\n`);
-          pushBytes(contentBytes);
-          pushStr('\nendstream\n');
-          endObj();
-
-          // Page
-          beginObj(pageId(i));
-          pushStr(`<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 ${wPt.toFixed(2)} ${hPt.toFixed(2)}] /Resources << /XObject << /Im${i+1} ${imgId(i)} 0 R >> >> /Contents ${contentId(i)} 0 R >>\n`);
-          endObj();
-        }
-
-        // XRef
-        const xrefStart = offset;
-        pushStr('xref\n');
-        pushStr(`0 ${objCount+1}\n`);
-        // object 0
-        pushStr('0000000000 65535 f \n');
-        for(let id=1; id<=objCount; id++){
-          const off = offsets[id] || 0;
-          pushStr(String(off).padStart(10,'0') + ' 00000 n \n');
-        }
-
-        // Trailer
-        pushStr('trailer\n');
-        pushStr(`<< /Size ${objCount+1} /Root ${catalogId} 0 R >>\n`);
-        pushStr('startxref\n');
-        pushStr(`${xrefStart}\n`);
-        pushStr('%%EOF\n');
-
-        // Concatenate chunks
-        const total = chunks.reduce((s,u)=>s+u.length,0);
-        const out = new Uint8Array(total);
-        let pos=0;
-        for(const c of chunks){
-          out.set(c,pos);
-          pos += c.length;
-        }
-        return out;
-      }
-
-
       function readFileAsDataUrl(file){
         return new Promise((resolve,reject)=>{
           const reader = new FileReader();
@@ -1344,203 +1004,11 @@ abcdefghijklmnopqrstuvwxyz
       }
 
       /*** State ***/
-      let state = deepClone((window.__EXPORTED_STATE__ ? window.__EXPORTED_STATE__ : DEFAULT_STATE));
+      let state = deepClone(DEFAULT_STATE);
 
       /*** DOM ***/
       const $ = (sel, root=document)=> root.querySelector(sel);
       const $$ = (sel, root=document)=> Array.from(root.querySelectorAll(sel));
-
-      /*** Ordering (sections reorder in preview) ***/
-      const FIXED_SECTION_IDS = ["page-presentation","page-logos","page-colors","page-typography","page-moodboard"];
-
-      function ensurePageOrder(){
-        // Ensure state.pageOrder exists and contains fixed + custom pages (in some order).
-        const custom = Array.isArray(state.customSections) ? state.customSections : [];
-        const customIds = custom.map(s=>`page-custom-${s.id}`);
-
-        if(!Array.isArray(state.pageOrder)) state.pageOrder = FIXED_SECTION_IDS.slice();
-
-        // Remove duplicates + unknown ids
-        const seen = new Set();
-        state.pageOrder = state.pageOrder.filter(id=>{
-          if(!id || seen.has(id)) return false;
-          const isFixed = FIXED_SECTION_IDS.includes(id);
-          const isCustom = id.startsWith("page-custom-") && customIds.includes(id);
-          if(!(isFixed || isCustom)) return false;
-          seen.add(id);
-          return true;
-        });
-
-        // Make sure all fixed are present (keep canonical order for missing ones)
-        for(const id of FIXED_SECTION_IDS){
-          if(!state.pageOrder.includes(id)){
-            state.pageOrder.push(id);
-          }
-        }
-
-        // Ensure all custom sections are present (insert before moodboard by default)
-        const moodIdx = state.pageOrder.indexOf("page-moodboard");
-        const insertAt = moodIdx >= 0 ? moodIdx : state.pageOrder.length;
-        for(const cid of customIds){
-          if(!state.pageOrder.includes(cid)){
-            state.pageOrder.splice(insertAt, 0, cid);
-          }
-        }
-      }
-
-      function syncCustomSectionsOrderFromPageOrder(){
-        const list = Array.isArray(state.customSections) ? state.customSections : [];
-        if(!list.length || !Array.isArray(state.pageOrder)) return;
-
-        const order = state.pageOrder
-          .filter(id=>id.startsWith("page-custom-"))
-          .map(id=>id.replace("page-custom-",""));
-
-        if(!order.length) return;
-
-        const byId = new Map(list.map(s=>[s.id, s]));
-        const reordered = [];
-        for(const id of order){
-          const s = byId.get(id);
-          if(s) reordered.push(s);
-          byId.delete(id);
-        }
-        // Append any remaining (safety)
-        for(const s of byId.values()) reordered.push(s);
-        state.customSections = reordered;
-      }
-
-      function applyPageOrderToDOM(){
-        // Physically reorder sections in preview to match state.pageOrder.
-        ensurePageOrder();
-        const preview = document.querySelector(".preview");
-        if(!preview) return;
-
-        const cover = document.getElementById("page-cover");
-        const index = document.getElementById("page-index");
-
-        // Collect current reorderable pages from DOM
-        const nodesById = new Map();
-        for(const el of Array.from(preview.querySelectorAll(".page"))){
-          if(el.id && el.id !== "page-cover" && el.id !== "page-index"){
-            nodesById.set(el.id, el);
-          }
-        }
-
-        // Insert in order after index (keep cover + index at top)
-        const anchor = index || cover;
-        let last = anchor;
-        for(const id of state.pageOrder){
-          const el = nodesById.get(id);
-          if(el){
-            preview.insertBefore(el, last.nextSibling);
-            last = el;
-          }
-        }
-      }
-
-      function syncPageOrderFromDOM(){
-        const preview = document.querySelector(".preview");
-        if(!preview) return;
-        const ids = Array.from(preview.querySelectorAll(".page"))
-          .map(p=>p.id)
-          .filter(id=>id && id !== "page-cover" && id !== "page-index");
-
-        state.pageOrder = ids;
-        syncCustomSectionsOrderFromPageOrder();
-      }
-
-      function installDragReorder(){
-        const preview = document.querySelector(".preview");
-        if(!preview) return;
-
-        // Add handles on fixed pages if missing (custom pages include it in their template)
-        const fixed = ["page-presentation","page-logos","page-colors","page-typography","page-moodboard"];
-        for(const id of fixed){
-          const page = document.getElementById(id);
-          if(!page) continue;
-          if(page.querySelector(".dragHandle")) continue;
-
-          const btn = document.createElement("button");
-          btn.className = "dragHandle";
-          btn.type = "button";
-          btn.setAttribute("draggable","true");
-          btn.setAttribute("data-drag-handle","true");
-          btn.setAttribute("aria-label","Déplacer la section");
-          btn.title = "Déplacer";
-          btn.textContent = "≡";
-          page.appendChild(btn);
-        }
-
-        // Mark pages as drop targets (excluding cover/index)
-        const pages = Array.from(preview.querySelectorAll(".page"))
-          .filter(p=>p.id && p.id !== "page-cover" && p.id !== "page-index");
-
-        // Avoid double-binding
-        if(preview.__dragReorderBound) return;
-        preview.__dragReorderBound = true;
-
-        let draggingPage = null;
-
-        preview.addEventListener("dragstart", (e)=>{
-          const handle = e.target && e.target.closest && e.target.closest("[data-drag-handle='true']");
-          if(!handle) return;
-          const page = handle.closest(".page");
-          if(!page || page.id === "page-cover" || page.id === "page-index") return;
-
-          draggingPage = page;
-          page.classList.add("dragging");
-          try{
-            e.dataTransfer.setData("text/plain", page.id);
-          }catch(_){}
-          e.dataTransfer.effectAllowed = "move";
-        });
-
-        preview.addEventListener("dragend", ()=>{
-          // dragend fires even if drop does not (e.g., drop outside a valid target).
-          // We persist and re-render here to keep the Index in sync with the visual order.
-          if(draggingPage){
-            draggingPage.classList.remove("dragging");
-            draggingPage = null;
-          }
-          syncPageOrderFromDOM();
-          renderSectionsPanel();
-          renderIndex();
-        });
-
-        preview.addEventListener("dragover", (e)=>{
-          if(!draggingPage) return;
-          const overPage = e.target && e.target.closest && e.target.closest(".page");
-          if(!overPage || overPage === draggingPage) return;
-          if(overPage.id === "page-cover" || overPage.id === "page-index") return;
-
-          e.preventDefault(); // allow drop
-
-          const rect = overPage.getBoundingClientRect();
-          const before = (e.clientY - rect.top) < (rect.height / 2);
-          const previewRect = preview.getBoundingClientRect();
-
-          // Insert before/after within preview container
-          if(before){
-            preview.insertBefore(draggingPage, overPage);
-          }else{
-            preview.insertBefore(draggingPage, overPage.nextSibling);
-          }
-        });
-
-        preview.addEventListener("drop", (e)=>{
-          if(!draggingPage) return;
-          e.preventDefault();
-          draggingPage.classList.remove("dragging");
-          draggingPage = null;
-
-          // Persist order
-          syncPageOrderFromDOM();
-          renderSectionsPanel();
-          renderIndex();
-        });
-      }
-
 
       const logoDrop = $("#logoDrop");
       const logoFile = $("#logoFile");
@@ -1561,23 +1029,8 @@ abcdefghijklmnopqrstuvwxyz
 
       const primaryFont = $("#primaryFont");
       const secondaryFont = $("#secondaryFont");
-      const googleFontsUrl = $("#googleFontsUrl");
-      const primaryFamily = $("#primaryFamily");
-      const secondaryFamily = $("#secondaryFamily");
-      const primaryFallback = $("#primaryFallback");
-      const secondaryFallback = $("#secondaryFallback");
-      const primaryFontFile = $("#primaryFontFile");
-      const secondaryFontFile = $("#secondaryFontFile");
-      const btnApplyFonts = $("#btnApplyFonts");
-
-      const btnAddSection = $("#btnAddSection");
-      const sectionsList = $("#sectionsList");
-      const customPagesMount = $("#customPagesMount");
-      const indexList = $("#indexList");
-
 
       const btnPrint = $("#btnPrint");
-      const btnExportHTML = $("#btnExportHTML");
       const btnExport = $("#btnExport");
       const btnImport = $("#btnImport");
       const importFile = $("#importFile");
@@ -1617,94 +1070,13 @@ abcdefghijklmnopqrstuvwxyz
         setCssVar('--font-primary', state.typography.primaryFont);
         setCssVar('--font-secondary', state.typography.secondaryFont);
 
-        // Apply preview for typography section
         $("#typoPrimarySample").style.fontFamily = state.typography.primaryFont;
         $("#typoSecondarySample").style.fontFamily = state.typography.secondaryFont;
         $("#typoPrimaryName").textContent = state.typography.primaryFont;
         $("#typoSecondaryName").textContent = state.typography.secondaryFont;
 
-        // Also apply fonts to key headings (keep the model readable)
+        // Also apply fonts to key headings
         $$(".docTitle, .kicker").forEach(el => el.style.fontFamily = state.typography.primaryFont);
-      }
-
-      function buildFontStack(familyName, fallback){
-        const fam = (familyName || "").trim();
-        if(!fam) return fallback;
-        // Quote family when it contains spaces or special chars
-        const needsQuotes = /[\s"']/.test(fam);
-        const q = needsQuotes ? `'${fam.replace(/'/g,"\\'")}'` : fam;
-        return `${q}, ${fallback}`;
-      }
-
-      function applyGoogleFontsCss(url){
-        const id = "gf-css";
-        const old = document.getElementById(id);
-        const clean = (url || "").trim();
-        if(!clean){
-          if(old) old.remove();
-          return;
-        }
-        if(old){
-          old.href = clean;
-          return;
-        }
-        const link = document.createElement("link");
-        link.id = id;
-        link.rel = "stylesheet";
-        link.href = clean;
-        document.head.appendChild(link);
-      }
-
-      async function ingestFontFile(file, which){
-        // Read as data URL to embed in exported JSON
-        const dataUrl = await readFileAsDataUrl(file);
-        const family = (which === "primary" ? state.typography.primaryFamily : state.typography.secondaryFamily) || "";
-        const fallback = (which === "primary" ? state.typography.primaryFallback : state.typography.secondaryFallback);
-
-        // If no family name, derive from file name
-        let fam = family.trim();
-        if(!fam){
-          fam = (file.name || "CustomFont").replace(/\.[^.]+$/,'').replace(/[_-]+/g,' ').trim();
-          if(which === "primary") { state.typography.primaryFamily = fam; primaryFamily.value = fam; }
-          else { state.typography.secondaryFamily = fam; secondaryFamily.value = fam; }
-        }
-
-        if(which === "primary"){
-          state.typography.primaryFontData = dataUrl;
-          state.typography.primaryFontMime = file.type || "";
-          state.typography.primaryFont = buildFontStack(state.typography.primaryFamily, fallback);
-          primaryFont.value = ""; // let stack be built
-        }else{
-          state.typography.secondaryFontData = dataUrl;
-          state.typography.secondaryFontMime = file.type || "";
-          state.typography.secondaryFont = buildFontStack(state.typography.secondaryFamily, fallback);
-          secondaryFont.value = "";
-        }
-      }
-
-      async function ensureEmbeddedFontsLoaded(){
-        // Load embedded font data (if any) into document.fonts so preview works offline after import.
-        const loads = [];
-        if(state.typography.primaryFontData && state.typography.primaryFamily){
-          loads.push(loadFontFace(state.typography.primaryFamily, state.typography.primaryFontData));
-        }
-        if(state.typography.secondaryFontData && state.typography.secondaryFamily){
-          loads.push(loadFontFace(state.typography.secondaryFamily, state.typography.secondaryFontData));
-        }
-        try{ await Promise.all(loads); }catch(e){ console.warn("Font load failed", e); }
-      }
-
-      async function loadFontFace(family, dataUrl){
-        // Avoid duplicate loads
-        const key = `__ff_${family}`;
-        if(loadFontFace[key]) return;
-        loadFontFace[key] = true;
-
-        const ff = new FontFace(family, `url(${dataUrl})`);
-        const loaded = await ff.load();
-        document.fonts.add(loaded);
-        // Ensure a reflow for preview
-        await document.fonts.ready;
       }
 
       function applyLogo(){
@@ -1718,272 +1090,69 @@ abcdefghijklmnopqrstuvwxyz
         logoImgLight.style.display = has ? "block" : "none";
       }
 
-      
-function renderMoodboard(){
-  moodGrid.innerHTML = "";
-  if(!state.moodboard.length){
-    const empty = document.createElement('div');
-    empty.className = 'hint muted';
-    empty.textContent = "Aucune image. Ajoutez-en via le panneau de contrôle.";
-    moodGrid.appendChild(empty);
-    return;
-  }
-
-  state.moodboard.forEach((src, idx)=>{
-    const wrap = document.createElement('div');
-    wrap.className = 'mood';
-
-    const img = document.createElement('img');
-    img.src = src;
-    img.alt = `Moodboard ${idx+1}`;
-
-    const actions = document.createElement('div');
-    actions.className = 'moodActions';
-
-    const del = document.createElement('button');
-    del.className = 'miniBtn';
-    del.type = 'button';
-    del.textContent = 'Supprimer';
-    del.addEventListener('click', ()=>{
-      state.moodboard.splice(idx,1);
-      renderMoodboard();
-    });
-
-    const up = document.createElement('button');
-    up.className = 'miniBtn';
-    up.type = 'button';
-    up.textContent = '↑';
-    up.disabled = idx===0;
-    up.addEventListener('click', ()=>{
-      if(idx===0) return;
-      const tmp = state.moodboard[idx-1];
-      state.moodboard[idx-1] = state.moodboard[idx];
-      state.moodboard[idx] = tmp;
-      renderMoodboard();
-    });
-
-    const down = document.createElement('button');
-    down.className = 'miniBtn';
-    down.type = 'button';
-    down.textContent = '↓';
-    down.disabled = idx===state.moodboard.length-1;
-    down.addEventListener('click', ()=>{
-      if(idx>=state.moodboard.length-1) return;
-      const tmp = state.moodboard[idx+1];
-      state.moodboard[idx+1] = state.moodboard[idx];
-      state.moodboard[idx] = tmp;
-      renderMoodboard();
-    });
-
-    actions.appendChild(up);
-    actions.appendChild(down);
-    actions.appendChild(del);
-
-    wrap.appendChild(img);
-    wrap.appendChild(actions);
-    moodGrid.appendChild(wrap);
-  });
-}
-
-function escapeHtml(str){
-  return String(str||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-}
-function escapeAttr(str){
-  return escapeHtml(str).replace(/"/g,"&quot;");
-}
-
-function indexLabel(str){
-  const s = String(str||"").trim();
-  if(!s) return "";
-  return s.charAt(0).toLocaleUpperCase('fr-FR') + s.slice(1);
-}
-
-
-function renderCustomSections(){
-        // Remove existing custom pages (wherever they are in the DOM)
-        $$(".page[id^='page-custom-']").forEach(el=> el.remove());
-
-        const preview = document.querySelector(".preview");
-        const mood = document.getElementById("page-moodboard");
-        if(!preview || !mood) return;
-
-        const list = Array.isArray(state.customSections) ? state.customSections : [];
-        for(const sec of list){
-          const id = sec.id;
-          const sectionEl = document.createElement('section');
-          sectionEl.className = 'page';
-          sectionEl.id = `page-custom-${id}`;
-
-          sectionEl.innerHTML = `
-            <div class="pageHeader">
-              <div>
-                <div class="sectionTitle" contenteditable="true" data-custom-title="${id}">${escapeHtml(sec.label || "Section")}</div>
-                <div class="kicker" contenteditable="true" data-custom-subtitle="${id}">${escapeHtml(sec.title || "Titre")}</div>
-              </div>
-              <div class="version" contenteditable="true" data-bind="meta.version">${escapeHtml(state.meta.version || "")}</div>
-            </div>
-            <button class="dragHandle" type="button" draggable="true" data-drag-handle="true" aria-label="Déplacer la section" title="Déplacer">≡</button>
-
-            <p class="para" contenteditable="true" data-custom-body="${id}">${escapeHtml(sec.body || "Contenu…")}</p>
-          `;
-          // Insert before moodboard (default placement)
-          preview.insertBefore(sectionEl, mood);
-        }
-
-        // Re-apply ordering and drag handles after re-mount
-        applyPageOrderToDOM();
-        installDragReorder();
-
-        // Wire edit events for custom sections (contenteditable)
-        $$("[data-custom-title]").forEach(el=>{
-          el.addEventListener('input', ()=>{
-            const id = el.getAttribute('data-custom-title');
-            const s = state.customSections.find(x=>x.id===id);
-            if(s) s.label = el.textContent.trim() || "Section";
-            renderIndex();
-            renderSectionsPanel();
-          });
-        });
-        $$("[data-custom-subtitle]").forEach(el=>{
-          el.addEventListener('input', ()=>{
-            const id = el.getAttribute('data-custom-subtitle');
-            const s = state.customSections.find(x=>x.id===id);
-            if(s) s.title = el.textContent.trim() || "Titre";
-            renderIndex();
-            renderSectionsPanel();
-          });
-        });
-        $$("[data-custom-body]").forEach(el=>{
-          el.addEventListener('input', ()=>{
-            const id = el.getAttribute('data-custom-body');
-            const s = state.customSections.find(x=>x.id===id);
-            if(s) s.body = el.textContent;
-          });
-        });
-      }
-
-      function renderIndex(){
-        if(!indexList) return;
-        indexList.innerHTML = "";
-
-        ensurePageOrder();
-
-        const ids = (Array.isArray(state.pageOrder) ? state.pageOrder : []).filter(Boolean);
-
-        for(const id of ids){
-          const page = document.getElementById(id);
-          const label =
-            (page?.querySelector(".sectionTitle")?.textContent || "").trim() ||
-            (id.startsWith("page-custom-") ? "Section" : id.replace(/^page-/, ""));
-
-          const a = document.createElement("a");
-          a.className = "indexItem";
-          a.href = `#${id}`;
-          a.innerHTML = `<span>${escapeHtml(indexLabel(label))}</span><span class="muted">•</span>`;
-          indexList.appendChild(a);
-        }
-      }
-
-      function renderSectionsPanel(){
-        if(!sectionsList) return;
-        const list = Array.isArray(state.customSections) ? state.customSections : [];
-        if(!list.length){
-          sectionsList.innerHTML = '<div class="hint muted">Aucune section supplémentaire.</div>';
+      function renderMoodboard(){
+        moodGrid.innerHTML = "";
+        if(!state.moodboard.length){
+          const empty = document.createElement('div');
+          empty.className = 'hint muted';
+          empty.textContent = "Aucune image. Ajoutez-en via le panneau de contrôle.";
+          moodGrid.appendChild(empty);
           return;
         }
+        state.moodboard.forEach((src, idx)=>{
+          const wrap = document.createElement('div');
+          wrap.className = 'mood';
 
-        sectionsList.innerHTML = "";
-        list.forEach((sec, idx)=>{
-          const row = document.createElement("div");
-          row.className = "swatchRow";
-          row.style.marginTop = "10px";
-          row.innerHTML = `
-            <div class="swatchMeta">
-              <div class="label">Libellé (Index)</div>
-              <input class="input" type="text" data-sec-label="${sec.id}" value="${escapeAttr(sec.label || "")}" placeholder="Ex. Iconographie" />
-              <div class="label" style="margin-top:6px">Titre (page)</div>
-              <input class="input" type="text" data-sec-title="${sec.id}" value="${escapeAttr(sec.title || "")}" placeholder="Ex. Système iconographique" />
-              <div class="hint">Le contenu est éditable directement dans l’aperçu.</div>
-            </div>
-            <div style="display:flex; flex-direction:column; gap:8px; align-items:flex-end;">
-              <button class="btn" type="button" data-sec-up="${sec.id}" ${idx===0?'disabled':''}>↑</button>
-              <button class="btn" type="button" data-sec-down="${sec.id}" ${idx===list.length-1?'disabled':''}>↓</button>
-              <button class="btn" type="button" data-sec-del="${sec.id}">Supprimer</button>
-            </div>
-          `;
-          sectionsList.appendChild(row);
-        });
+          const img = document.createElement('img');
+          img.src = src;
+          img.alt = `Moodboard ${idx+1}`;
 
-        // Wire panel events
-        $$("[data-sec-label]").forEach(inp=>{
-          inp.addEventListener("input", ()=>{
-            const id = inp.getAttribute("data-sec-label");
-            const s = state.customSections.find(x=>x.id===id);
-            if(s){ s.label = inp.value; renderCustomSections(); renderIndex(); }
-          });
-        });
-        $$("[data-sec-title]").forEach(inp=>{
-          inp.addEventListener("input", ()=>{
-            const id = inp.getAttribute("data-sec-title");
-            const s = state.customSections.find(x=>x.id===id);
-            if(s){ s.title = inp.value; renderCustomSections(); renderIndex(); }
-          });
-        });
-        $$("[data-sec-up]").forEach(btn=>{
-          btn.addEventListener("click", ()=>{
-            const id = btn.getAttribute("data-sec-up");
-            moveSection(id, -1);
-          });
-        });
-        $$("[data-sec-down]").forEach(btn=>{
-          btn.addEventListener("click", ()=>{
-            const id = btn.getAttribute("data-sec-down");
-            moveSection(id, +1);
-          });
-        });
-        $$("[data-sec-del]").forEach(btn=>{
-          btn.addEventListener("click", ()=>{
-            const id = btn.getAttribute("data-sec-del");
-            const i = state.customSections.findIndex(x=>x.id===id);
-            if(i>=0){ const removed = state.customSections[i]; state.customSections.splice(i,1); if(Array.isArray(state.pageOrder) && removed){ state.pageOrder = state.pageOrder.filter(pid=>pid!==`page-custom-${removed.id}`); } renderCustomSections(); renderSectionsPanel(); renderIndex(); applyPageOrderToDOM(); installDragReorder(); }
-          });
-        });
-      }
+          const actions = document.createElement('div');
+          actions.className = 'moodActions';
 
-      function moveSection(id, dir){
-        const list = state.customSections;
-        const i = list.findIndex(x=>x.id===id);
-        const j = i + dir;
-        if(i<0 || j<0 || j>=list.length) return;
-        const tmp = list[i]; list[i] = list[j]; list[j] = tmp;
-        renderCustomSections(); renderSectionsPanel(); renderIndex();
-      }
+          const del = document.createElement('button');
+          del.className = 'miniBtn';
+          del.type = 'button';
+          del.textContent = 'Supprimer';
+          del.addEventListener('click', ()=>{
+            state.moodboard.splice(idx,1);
+            renderMoodboard();
+          });
 
-      function addCustomSection(){
-        state.customSections = Array.isArray(state.customSections) ? state.customSections : [];
-        const id = (window.crypto && window.crypto.randomUUID) ? window.crypto.randomUUID().slice(0,8) : String(Date.now());
-        state.customSections.push({
-          id,
-          label: "Nouvelle section",
-          title: "Titre de section",
-          body: "Éditez ce contenu directement dans l’aperçu."
+          const up = document.createElement('button');
+          up.className = 'miniBtn';
+          up.type = 'button';
+          up.textContent = '↑';
+          up.disabled = idx===0;
+          up.addEventListener('click', ()=>{
+            if(idx===0) return;
+            const tmp = state.moodboard[idx-1];
+            state.moodboard[idx-1] = state.moodboard[idx];
+            state.moodboard[idx] = tmp;
+            renderMoodboard();
+          });
+
+          const down = document.createElement('button');
+          down.className = 'miniBtn';
+          down.type = 'button';
+          down.textContent = '↓';
+          down.disabled = idx===state.moodboard.length-1;
+          down.addEventListener('click', ()=>{
+            if(idx>=state.moodboard.length-1) return;
+            const tmp = state.moodboard[idx+1];
+            state.moodboard[idx+1] = state.moodboard[idx];
+            state.moodboard[idx] = tmp;
+            renderMoodboard();
+          });
+
+          actions.appendChild(up);
+          actions.appendChild(down);
+          actions.appendChild(del);
+
+          wrap.appendChild(img);
+          wrap.appendChild(actions);
+          moodGrid.appendChild(wrap);
         });
-        ensurePageOrder();
-        const newPid = `page-custom-${id}`;
-        // Insert before moodboard by default
-        const mi = state.pageOrder.indexOf('page-moodboard');
-        const at = mi>=0 ? mi : state.pageOrder.length;
-        if(!state.pageOrder.includes(newPid)) state.pageOrder.splice(at,0,newPid);
-        renderCustomSections();
-        renderSectionsPanel();
-        renderIndex();
-        applyPageOrderToDOM();
-        installDragReorder();
-
-        applyPageOrderToDOM();
-        installDragReorder();
-        // Jump to the new section
-        location.hash = `#page-custom-${id}`;
       }
 
       function bindInputsToState(){
@@ -2061,35 +1230,16 @@ function renderCustomSections(){
         $("#brandName").value = state.brand.name;
         $("#brandTagline").value = state.brand.tagline;
 
-        // Typography controls
-        if(googleFontsUrl) googleFontsUrl.value = state.typography.googleFontsUrl || "";
-        if(primaryFamily) primaryFamily.value = state.typography.primaryFamily || "";
-        if(secondaryFamily) secondaryFamily.value = state.typography.secondaryFamily || "";
-        if(primaryFallback) primaryFallback.value = state.typography.primaryFallback || DEFAULT_STATE.typography.primaryFallback;
-        if(secondaryFallback) secondaryFallback.value = state.typography.secondaryFallback || DEFAULT_STATE.typography.secondaryFallback;
-
-        primaryFont.value = state.typography.primaryFont || DEFAULT_STATE.typography.primaryFont;
-        secondaryFont.value = state.typography.secondaryFont || DEFAULT_STATE.typography.secondaryFont;
-
         // Update bound text fields in preview
         hydrateEditableFields();
 
         // Palette & typography
         applyPaletteToCss();
-        applyGoogleFontsCss(state.typography.googleFontsUrl || "");
-        ensureEmbeddedFontsLoaded().then(()=>{ applyTypographyToCss(); });
         applyTypographyToCss();
 
         // Logo & moodboard
         applyLogo();
         renderMoodboard();
-
-        // Custom sections + index
-        renderCustomSections();
-        renderSectionsPanel();
-        renderIndex();
-        applyPageOrderToDOM();
-        installDragReorder();
 
         // Update palette controls (inputs reflect current state)
         bindInputsToState();
@@ -2405,53 +1555,13 @@ function renderCustomSections(){
       }
 
       function wireTypographyInputs(){
-        // Seed controls (state -> inputs)
-        googleFontsUrl.value = state.typography.googleFontsUrl || "";
-        primaryFamily.value = state.typography.primaryFamily || "";
-        secondaryFamily.value = state.typography.secondaryFamily || "";
-        primaryFallback.value = state.typography.primaryFallback || DEFAULT_STATE.typography.primaryFallback;
-        secondaryFallback.value = state.typography.secondaryFallback || DEFAULT_STATE.typography.secondaryFallback;
-
-        primaryFont.value = state.typography.primaryFont || DEFAULT_STATE.typography.primaryFont;
-        secondaryFont.value = state.typography.secondaryFont || DEFAULT_STATE.typography.secondaryFont;
-
-        async function applyFromControls(){
-          // Persist controls
-          state.typography.googleFontsUrl = (googleFontsUrl.value || "").trim();
-          state.typography.primaryFamily = (primaryFamily.value || "").trim();
-          state.typography.secondaryFamily = (secondaryFamily.value || "").trim();
-          state.typography.primaryFallback = (primaryFallback.value || DEFAULT_STATE.typography.primaryFallback).trim();
-          state.typography.secondaryFallback = (secondaryFallback.value || DEFAULT_STATE.typography.secondaryFallback).trim();
-
-          // If user pasted full stack, keep it; otherwise build from family + fallback
-          const pStack = (primaryFont.value || "").trim();
-          const sStack = (secondaryFont.value || "").trim();
-
-          state.typography.primaryFont = pStack || buildFontStack(state.typography.primaryFamily, state.typography.primaryFallback);
-          state.typography.secondaryFont = sStack || buildFontStack(state.typography.secondaryFamily, state.typography.secondaryFallback);
-
-          // Load Google Fonts CSS if provided
-          applyGoogleFontsCss(state.typography.googleFontsUrl);
-
-          // Load uploaded font files (if any chosen)
-          if(primaryFontFile && primaryFontFile.files && primaryFontFile.files[0]){
-            await ingestFontFile(primaryFontFile.files[0], "primary");
-            primaryFontFile.value = "";
-          }
-          if(secondaryFontFile && secondaryFontFile.files && secondaryFontFile.files[0]){
-            await ingestFontFile(secondaryFontFile.files[0], "secondary");
-            secondaryFontFile.value = "";
-          }
-
-          await ensureEmbeddedFontsLoaded();
+        primaryFont.addEventListener('input', ()=>{
+          state.typography.primaryFont = primaryFont.value || DEFAULT_STATE.typography.primaryFont;
           applyTypographyToCss();
-        }
-
-        btnApplyFonts.addEventListener('click', ()=>{ applyFromControls(); });
-
-        // Apply on Enter for URL and family names
-        [googleFontsUrl, primaryFamily, secondaryFamily, primaryFallback, secondaryFallback, primaryFont, secondaryFont].forEach(el=>{
-          el.addEventListener('keydown', (e)=>{ if(e.key === "Enter"){ e.preventDefault(); applyFromControls(); }});
+        });
+        secondaryFont.addEventListener('input', ()=>{
+          state.typography.secondaryFont = secondaryFont.value || DEFAULT_STATE.typography.secondaryFont;
+          applyTypographyToCss();
         });
 
         // Bind samples (contenteditable)
@@ -2484,29 +1594,6 @@ function renderCustomSections(){
 
         btnPrint.addEventListener('click', ()=> window.print());
 
-        btnExportHTML.addEventListener('click', ()=>{
-          // Exporte un fichier HTML autonome contenant l'état courant (logo, couleurs, textes, sections, moodboard, fonts via dataURL)
-          const snapshot = JSON.parse(JSON.stringify(state));
-
-          // Empêche toute interprétation HTML accidentelle (ex: <\/script>)
-          const safeJson = JSON.stringify(snapshot).replace(/</g, '\u003c');
-
-          const injected = `<script>window.__EXPORTED_STATE__ = ${safeJson};<\/script>`;
-
-          // On prend le HTML actuel et on injecte le snapshot dans le <head> afin qu'il soit chargé avant le script principal.
-          let html = '<!doctype html>\n' + document.documentElement.outerHTML;
-
-          // Nettoyage : si un export précédent a déjà injecté un état, on le retire pour éviter les doublons
-          html = html.replace(/<script>\s*window\.__EXPORTED_STATE__[\s\S]*?<\/script>\s*/i, '');
-
-          // Injection dans <head>
-          html = html.replace(/<head([^>]*)>/i, (m, attrs)=> `<head${attrs}>${injected}`);
-
-          downloadText('charte.html', html, 'text/html');
-        });
-
-btnAddSection && btnAddSection.addEventListener('click', ()=> addCustomSection());
-
         btnExport.addEventListener('click', ()=>{
           downloadText('charte.json', JSON.stringify(state, null, 2), 'application/json');
         });
@@ -2526,13 +1613,6 @@ btnAddSection && btnAddSection.addEventListener('click', ()=> addCustomSection()
             state.brand = state.brand || deepClone(DEFAULT_STATE.brand);
             state.colors = state.colors || deepClone(DEFAULT_STATE.colors);
             state.typography = state.typography || deepClone(DEFAULT_STATE.typography);
-            // backfill new typography keys
-            state.typography.googleFontsUrl = state.typography.googleFontsUrl || "";
-            state.typography.primaryFamily = state.typography.primaryFamily || "";
-            state.typography.secondaryFamily = state.typography.secondaryFamily || "";
-            state.typography.primaryFallback = state.typography.primaryFallback || DEFAULT_STATE.typography.primaryFallback;
-            state.typography.secondaryFallback = state.typography.secondaryFallback || DEFAULT_STATE.typography.secondaryFallback;
-            state.customSections = Array.isArray(state.customSections) ? state.customSections : [];
             state.texts = state.texts || deepClone(DEFAULT_STATE.texts);
             state.moodboard = state.moodboard || [];
             state.logo = state.logo || {dataUrl:"", mime:""};
