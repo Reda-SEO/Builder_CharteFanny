@@ -943,6 +943,20 @@ class CharteGraphique {
     element.style.gap = '8px';
     element.style.marginTop = '8px';
 
+    // Ajuster la bannière pour le PDF
+    const bannerTitle = document.getElementById('banner-brand-name');
+    const bannerSubtitle = document.getElementById('banner-baseline');
+    const bannerGraphic = document.querySelector('.banner-graphic');
+    const savedBannerStyles = {
+      titleAlign: bannerTitle?.style.textAlign,
+      subtitleAlign: bannerSubtitle?.style.textAlign,
+      graphicMargin: bannerGraphic?.style.margin
+    };
+
+    if (bannerTitle) bannerTitle.style.textAlign = 'left';
+    if (bannerSubtitle) bannerSubtitle.style.textAlign = 'left';
+    if (bannerGraphic) bannerGraphic.style.margin = '-92px 0 -93px auto';
+
     // Configuration avec marges minimales et gestion des sauts de page
     const opt = {
       margin: [3, 5, 3, 5], // top, right, bottom, left (en mm)
@@ -986,6 +1000,11 @@ class CharteGraphique {
       element.style.padding = originalPadding;
       element.style.gap = originalGap;
       element.style.marginTop = originalMarginTop;
+
+      // Restaurer les styles de la bannière
+      if (bannerTitle) bannerTitle.style.textAlign = savedBannerStyles.titleAlign;
+      if (bannerSubtitle) bannerSubtitle.style.textAlign = savedBannerStyles.subtitleAlign;
+      if (bannerGraphic) bannerGraphic.style.margin = savedBannerStyles.graphicMargin;
     }
   }
 
