@@ -933,9 +933,9 @@ class CharteGraphique {
       obj.style.display = 'none';
     });
 
-    // Configuration simplifiée
+    // Configuration avec marges réduites et gestion des sauts de page
     const opt = {
-      margin: [5, 5],
+      margin: [3, 3, 3, 3], // top, right, bottom, left (en mm)
       filename: `charte-graphique-${this.data.brandName.replace(/\s+/g, '-').toLowerCase()}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: {
@@ -948,6 +948,15 @@ class CharteGraphique {
         unit: 'mm',
         format: 'a4',
         orientation: 'portrait'
+      },
+      pagebreak: {
+        mode: ['avoid-all', 'css', 'legacy'],
+        before: '.card1',
+        after: '.card1',
+        avoid: ['.card1', '.card-overlay-plus-border-shadow1', '.card-overlay-plus-border-shadow2',
+                '.card-overlay-plus-border-shadow3', '.card-overlay-plus-border-shadow4',
+                '.card-overlay-plus-border-shadow5', '.card-overlay-plus-border-shadow6',
+                '.card-overlay-plus-border-shadow7']
       }
     };
 
