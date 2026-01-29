@@ -933,17 +933,19 @@ class CharteGraphique {
       obj.style.display = 'none';
     });
 
-    // Sauvegarder et élargir temporairement le contenu pour remplir la page
+    // Sauvegarder et optimiser temporairement le contenu pour remplir la page
     const originalMaxWidth = element.style.maxWidth;
     const originalPadding = element.style.padding;
     const originalGap = element.style.gap;
+    const originalMarginTop = element.style.marginTop;
     element.style.maxWidth = '95%';
     element.style.padding = '0 12px';
-    element.style.gap = '16px';
+    element.style.gap = '8px';
+    element.style.marginTop = '8px';
 
     // Configuration avec marges minimales et gestion des sauts de page
     const opt = {
-      margin: [5, 5, 5, 5], // top, right, bottom, left (en mm)
+      margin: [3, 5, 3, 5], // top, right, bottom, left (en mm)
       filename: `charte-graphique-${this.data.brandName.replace(/\s+/g, '-').toLowerCase()}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: {
@@ -985,6 +987,7 @@ class CharteGraphique {
       element.style.maxWidth = originalMaxWidth;
       element.style.padding = originalPadding;
       element.style.gap = originalGap;
+      element.style.marginTop = originalMarginTop;
     }
   }
 
