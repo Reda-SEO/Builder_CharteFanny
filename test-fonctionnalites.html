@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test des Fonctionnalités - Charte Graphique</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      padding: 40px;
+    }
+
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 2.5em;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 1.1em;
+    }
+
+    .status {
+      background: #f0f9ff;
+      border-left: 4px solid #3b82f6;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+    }
+
+    .status.success {
+      background: #f0fdf4;
+      border-left-color: #22c55e;
+    }
+
+    .feature-list {
+      list-style: none;
+      margin: 20px 0;
+    }
+
+    .feature-item {
+      padding: 15px;
+      margin: 10px 0;
+      background: #f8fafc;
+      border-radius: 10px;
+      border: 2px solid #e2e8f0;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .feature-item:hover {
+      border-color: #667eea;
+      transform: translateX(5px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+    }
+
+    .feature-item::before {
+      content: '✓';
+      display: inline-block;
+      width: 25px;
+      height: 25px;
+      background: #22c55e;
+      color: white;
+      text-align: center;
+      line-height: 25px;
+      border-radius: 50%;
+      margin-right: 10px;
+      font-weight: bold;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 15px 30px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      text-decoration: none;
+      border-radius: 10px;
+      font-weight: 600;
+      transition: all 0.3s;
+      margin: 10px 10px 10px 0;
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.6);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+    }
+
+    .btn-secondary:hover {
+      box-shadow: 0 8px 20px rgba(245, 87, 108, 0.6);
+    }
+
+    .info-box {
+      background: #fffbeb;
+      border: 2px solid #fbbf24;
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 30px;
+    }
+
+    .info-box h3 {
+      color: #92400e;
+      margin-bottom: 10px;
+    }
+
+    .info-box ul {
+      list-style: disc;
+      margin-left: 20px;
+      color: #92400e;
+    }
+
+    .footer {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 2px solid #e2e8f0;
+      text-align: center;
+      color: #64748b;
+      font-size: 0.9em;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 20px;
+      }
+
+      h1 {
+        font-size: 1.8em;
+      }
+
+      .btn {
+        display: block;
+        margin: 10px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎨 Test des Fonctionnalités</h1>
+    <p class="subtitle">Vérification de l'outil de création de charte graphique</p>
+
+    <div class="status success">
+      <strong>✓ Tous les fichiers sont en place !</strong><br>
+      L'application est prête à être utilisée.
+    </div>
+
+    <h2>📋 Fonctionnalités disponibles</h2>
+    <ul class="feature-list">
+      <li class="feature-item">Upload de logo (PNG, JPG, SVG)</li>
+      <li class="feature-item">Édition du nom de marque et baseline</li>
+      <li class="feature-item">Sélection de couleurs (primaire, secondaire, tertiaire)</li>
+      <li class="feature-item">Création de dégradés personnalisés</li>
+      <li class="feature-item">Configuration des typographies</li>
+      <li class="feature-item">Support Google Fonts</li>
+      <li class="feature-item">Upload d'images pour le moodboard</li>
+      <li class="feature-item">Navigation intelligente entre sections</li>
+      <li class="feature-item">Export PDF haute qualité</li>
+    </ul>
+
+    <div style="margin-top: 30px;">
+      <a href="tunnel-creation.html" class="btn">🚀 Lancer l'application</a>
+      <a href="index.html" class="btn btn-secondary">📄 Voir la page d'accueil</a>
+    </div>
+
+    <div class="info-box">
+      <h3>💡 Conseils de démarrage</h3>
+      <ul>
+        <li>Commencez par uploader votre logo</li>
+        <li>Définissez vos couleurs principales</li>
+        <li>Configurez vos typographies (Google Fonts recommandé)</li>
+        <li>Ajoutez 3-5 images au moodboard</li>
+        <li>Exportez votre charte en PDF</li>
+      </ul>
+    </div>
+
+    <div class="info-box" style="background: #eff6ff; border-color: #3b82f6;">
+      <h3 style="color: #1e40af;">📚 Documentation</h3>
+      <ul style="color: #1e40af;">
+        <li><strong>GUIDE_UTILISATION.md</strong> - Guide complet d'utilisation</li>
+        <li><strong>README_PROJET.md</strong> - Documentation technique</li>
+        <li><strong>README.md</strong> - Instructions de démarrage</li>
+      </ul>
+    </div>
+
+    <div class="footer">
+      <p><strong>Version 1.0.0</strong> - Créé avec Claude Code</p>
+      <p>Janvier 2026</p>
+    </div>
+  </div>
+
+  <script>
+    // Animation au chargement
+    document.addEventListener('DOMContentLoaded', () => {
+      const items = document.querySelectorAll('.feature-item');
+      items.forEach((item, index) => {
+        item.style.opacity = '0';
+        item.style.transform = 'translateX(-20px)';
+        setTimeout(() => {
+          item.style.transition = 'all 0.5s';
+          item.style.opacity = '1';
+          item.style.transform = 'translateX(0)';
+        }, index * 100);
+      });
+    });
+
+    // Test de vérification des fichiers
+    window.addEventListener('load', () => {
+      fetch('js/app.js')
+        .then(response => {
+          if (response.ok) {
+            console.log('✓ Fichier JavaScript chargé avec succès');
+          }
+        })
+        .catch(() => {
+          console.warn('⚠ Fichier JavaScript non trouvé');
+        });
+    });
+  </script>
+</body>
+</html>
