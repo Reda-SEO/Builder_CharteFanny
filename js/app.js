@@ -961,8 +961,6 @@ class CharteGraphique {
       },
       pagebreak: {
         mode: ['avoid-all', 'css', 'legacy'],
-        before: '.card1',
-        after: '.card1',
         avoid: ['.card1', '.card-overlay-plus-border-shadow1', '.card-overlay-plus-border-shadow2',
                 '.card-overlay-plus-border-shadow3', '.card-overlay-plus-border-shadow4',
                 '.card-overlay-plus-border-shadow5', '.card-overlay-plus-border-shadow6',
