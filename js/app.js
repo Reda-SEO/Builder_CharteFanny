@@ -7,14 +7,15 @@ class CharteGraphique {
       brandName: 'Agence Immo',
       baseline: 'Un projet qui se construit',
       logo: null,
+      presentationText: 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo.',
       colors: {
         primary: { name: 'Bleu nuit', code: '#274359' },
         secondary: { name: 'Bleu pétrole', code: '#c77a3d' },
         tertiary: { name: 'Blanc glacial', code: '#e3f2fd' },
         gradient: {
           name: 'Opalescent',
-          color1: '#e3f2fd',
-          color2: '#e3f2fd'
+          color1: '#5796c6',
+          color2: '#ace3ff'
         }
       },
       fonts: {
@@ -32,9 +33,76 @@ class CharteGraphique {
     this.setupBrandInputs();
     this.setupColorPickers();
     this.setupFontInputs();
+    this.setupPresentationEditor();
     this.setupMoodboardUpload();
+    this.setupMoodboardDragDrop();
+    this.setupSectionsDragDrop();
     this.setupPDFExport();
     this.setupNavigation();
+    this.setupAccordion();
+    this.setupPanelToggle();
+  }
+
+  // === ACCORDION ===
+  setupAccordion() {
+    // Sélectionner toutes les cartes
+    const cards = document.querySelectorAll('.card1');
+
+    // Fermer toutes les cartes sauf la première (Logo)
+    cards.forEach((card, index) => {
+      const chevron = card.querySelector('.row-chevron');
+      if (!chevron) return;
+
+      // Fermer toutes les cartes sauf la première (index 0 = Logo)
+      if (index !== 0) {
+        card.classList.add('collapsed');
+        chevron.style.transform = 'rotate(-90deg)';
+      }
+    });
+
+    // Sélectionner toutes les lignes de titre qui contiennent un chevron
+    const headers = document.querySelectorAll('.card1 > .row-a, .card1 > .heading');
+
+    headers.forEach(header => {
+      const chevron = header.querySelector('.row-chevron');
+      if (!chevron) return;
+
+      // Rendre toute la ligne cliquable
+      header.style.cursor = 'pointer';
+
+      header.addEventListener('click', (e) => {
+        const card = header.closest('.card1');
+        if (!card) return;
+
+        const isCollapsed = card.classList.contains('collapsed');
+
+        // Toggle état
+        if (isCollapsed) {
+          card.classList.remove('collapsed');
+          chevron.style.transform = 'rotate(0deg)';
+        } else {
+          card.classList.add('collapsed');
+          chevron.style.transform = 'rotate(-90deg)';
+        }
+      });
+    });
+  }
+
+  // === PANEL TOGGLE ===
+  setupPanelToggle() {
+    const toggleArea = document.querySelector('.right-panel-row-top');
+    const rightPanel = document.querySelector('.right-panel');
+
+    if (!toggleArea || !rightPanel) return;
+
+    // Rendre toute la barre supérieure cliquable
+    toggleArea.style.cursor = 'pointer';
+    toggleArea.style.userSelect = 'none';
+
+    toggleArea.addEventListener('click', (e) => {
+      e.stopPropagation();
+      rightPanel.classList.toggle('left-panel-collapsed');
+    });
   }
 
   // === LOGO UPLOAD ===
@@ -59,6 +127,9 @@ class CharteGraphique {
     reader.onload = (event) => {
       this.data.logo = event.target.result;
       this.updateLogoPreview(event.target.result);
+
+      // Extraction automatique des couleurs
+      this.extractColorsFromLogo(event.target.result);
     };
     reader.readAsDataURL(file);
   }
@@ -73,22 +144,198 @@ class CharteGraphique {
     });
   }
 
+  // === COLOR EXTRACTION ===
+  extractColorsFromLogo(imageSrc) {
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+
+    img.onload = () => {
+      // Créer canvas temporaire
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      // Réduire taille pour performance
+      const maxSize = 200;
+      const scale = Math.min(maxSize / img.width, maxSize / img.height);
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+
+      // Dessiner image
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      // Lire pixels
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const colors = this.getDominantColors(imageData.data, 3);
+
+      // Appliquer couleurs extraites
+      if (colors.length >= 1) {
+        this.data.colors.primary.code = colors[0];
+        this.updateColorPreview('.col2 .column-input1', colors[0], 'primary');
+      }
+      if (colors.length >= 2) {
+        this.data.colors.secondary.code = colors[1];
+        this.updateColorPreview('.col3 .column-input1', colors[1], 'secondary');
+      }
+      if (colors.length >= 3) {
+        this.data.colors.tertiary.code = colors[2];
+        this.updateColorPreview('.col4 .column-input1', colors[2], 'tertiary');
+      }
+
+      // Notification
+      this.showNotification('✓ Couleurs extraites du logo');
+    };
+
+    img.onerror = () => {
+      console.error('Échec extraction couleurs');
+    };
+
+    img.src = imageSrc;
+  }
+
+  getDominantColors(pixels, numColors) {
+    const colorCounts = {};
+    const sampleStep = 10; // Échantillonner 1 pixel sur 10
+
+    // Collecter couleurs
+    for (let i = 0; i < pixels.length; i += sampleStep * 4) {
+      const r = pixels[i];
+      const g = pixels[i + 1];
+      const b = pixels[i + 2];
+      const a = pixels[i + 3];
+
+      // Ignorer transparents et blancs
+      if (a < 128 || (r > 240 && g > 240 && b > 240)) continue;
+
+      // Quantiser (réduire précision pour regrouper)
+      const quantR = Math.round(r / 8) * 8;
+      const quantG = Math.round(g / 8) * 8;
+      const quantB = Math.round(b / 8) * 8;
+
+      const key = `${quantR},${quantG},${quantB}`;
+      colorCounts[key] = (colorCounts[key] || 0) + 1;
+    }
+
+    // Trier par fréquence
+    const sorted = Object.entries(colorCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, numColors * 3);
+
+    // Sélectionner couleurs distinctes
+    const dominantColors = [];
+
+    for (const [colorKey] of sorted) {
+      if (dominantColors.length >= numColors) break;
+
+      const [r, g, b] = colorKey.split(',').map(Number);
+
+      // Vérifier distance avec couleurs existantes
+      const tooSimilar = dominantColors.some(existing => {
+        const [er, eg, eb] = this.hexToRgb(existing);
+        const distance = Math.sqrt(
+          Math.pow(r - er, 2) +
+          Math.pow(g - eg, 2) +
+          Math.pow(b - eb, 2)
+        );
+        return distance < 50; // Seuil de similarité
+      });
+
+      if (!tooSimilar) {
+        dominantColors.push(this.rgbToHex(r, g, b));
+      }
+    }
+
+    return dominantColors;
+  }
+
+  rgbToHex(r, g, b) {
+    return '#' + [r, g, b].map(x => {
+      const hex = Math.round(x).toString(16);
+      return hex.length === 1 ? '0' + hex : hex;
+    }).join('');
+  }
+
+  hexToRgb(hex) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? [
+      parseInt(result[1], 16),
+      parseInt(result[2], 16),
+      parseInt(result[3], 16)
+    ] : [0, 0, 0];
+  }
+
+  showNotification(message) {
+    const notif = document.createElement('div');
+    notif.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #4caf50;
+      color: white;
+      padding: 15px 25px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      z-index: 10000;
+      font-family: 'Inter', sans-serif;
+      animation: slideIn 0.3s ease;
+    `;
+    notif.textContent = message;
+
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideIn {
+        from { transform: translateX(400px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+    `;
+    document.head.appendChild(style);
+
+    document.body.appendChild(notif);
+
+    setTimeout(() => {
+      notif.style.animation = 'slideOut 0.3s ease';
+      setTimeout(() => notif.remove(), 300);
+    }, 3000);
+  }
+
   // === BRAND INPUTS ===
   setupBrandInputs() {
     // Nom de la marque
     const brandNameInput = document.querySelector('.input-group2 .input-group-input');
+    const bannerTitle = document.getElementById('banner-brand-name');
+
     if (brandNameInput) {
+      // Initialiser le titre de la bannière avec la valeur par défaut
+      if (bannerTitle) {
+        bannerTitle.textContent = this.data.brandName;
+      }
+
       brandNameInput.addEventListener('input', (e) => {
         this.data.brandName = e.target.value;
-        // Mise à jour du rendu si nécessaire
+
+        // Mise à jour du titre de la bannière
+        if (bannerTitle) {
+          bannerTitle.textContent = e.target.value || 'Nom de la marque';
+        }
       });
     }
 
     // Baseline
     const baselineInput = document.querySelector('.input-group3 .input-group-input');
+    const bannerBaseline = document.getElementById('banner-baseline');
+
     if (baselineInput) {
+      // Initialiser le sous-titre de la bannière avec la valeur par défaut
+      if (bannerBaseline) {
+        bannerBaseline.textContent = this.data.baseline;
+      }
+
       baselineInput.addEventListener('input', (e) => {
         this.data.baseline = e.target.value;
+
+        // Mise à jour du sous-titre de la bannière
+        if (bannerBaseline) {
+          bannerBaseline.textContent = e.target.value || 'Baseline';
+        }
       });
     }
   }
@@ -184,6 +431,9 @@ class CharteGraphique {
         input.click();
       });
     });
+
+    // Initialiser le preview au chargement
+    this.updateGradientPreview();
   }
 
   updateGradientPreview() {
@@ -310,6 +560,32 @@ class CharteGraphique {
     }
   }
 
+  // === PRESENTATION EDITOR ===
+  setupPresentationEditor() {
+    const presentationDiv = document.querySelector('.right-panel-input');
+    if (!presentationDiv) return;
+
+    // Rendre éditable
+    presentationDiv.contentEditable = 'true';
+    presentationDiv.style.cursor = 'text';
+
+    // Focus
+    presentationDiv.addEventListener('focus', (e) => {
+      e.target.style.borderColor = 'var(--primary-primary-main)';
+    });
+
+    // Blur - sauvegarder
+    presentationDiv.addEventListener('blur', (e) => {
+      e.target.style.borderColor = 'transparent';
+      this.data.presentationText = e.target.textContent.trim();
+    });
+
+    // Mise à jour temps réel
+    presentationDiv.addEventListener('input', (e) => {
+      this.data.presentationText = e.target.textContent.trim();
+    });
+  }
+
   // === MOODBOARD ===
   setupMoodboardUpload() {
     const uploadBtn = document.querySelector('.btn-overlay-plus-border12');
@@ -347,8 +623,19 @@ class CharteGraphique {
     this.data.moodboard.forEach((image, index) => {
       if (moodboardItems[index]) {
         moodboardItems[index].style.backgroundImage = `url(${image})`;
+        moodboardItems[index].dataset.index = index; // Ajouter index pour drag-drop
       }
     });
+
+    // Vider slots vides
+    for (let i = this.data.moodboard.length; i < moodboardItems.length; i++) {
+      if (moodboardItems[i]) {
+        moodboardItems[i].style.backgroundImage = 'none';
+      }
+    }
+
+    // Réattacher drag-drop listeners
+    this.setupMoodboardDragDrop();
   }
 
   setupMoodboardDelete() {
@@ -368,18 +655,248 @@ class CharteGraphique {
     });
   }
 
-  // === NAVIGATION ===
-  setupNavigation() {
-    const navItems = document.querySelectorAll('.overlay-plus-border-shadow');
-    const sections = document.querySelectorAll('.right-panel-col2 > .card1, .right-panel-overlay-plus');
+  setupMoodboardDragDrop() {
+    const items = document.querySelectorAll('.input-a');
 
-    navItems.forEach((item, index) => {
-      item.style.cursor = 'pointer';
-      item.addEventListener('click', () => {
-        if (sections[index]) {
-          sections[index].scrollIntoView({ behavior: 'smooth', block: 'start' });
+    items.forEach((item, index) => {
+      item.draggable = true;
+      item.dataset.index = index;
+
+      // Démarrage drag
+      item.addEventListener('dragstart', (e) => {
+        e.dataTransfer.effectAllowed = 'move';
+        e.currentTarget.classList.add('dragging');
+        this.draggedItemIndex = parseInt(e.currentTarget.dataset.index);
+      });
+
+      // Survol
+      item.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+      });
+
+      item.addEventListener('dragenter', (e) => {
+        if (e.target.classList.contains('input-a')) {
+          e.target.classList.add('drag-over');
         }
       });
+
+      item.addEventListener('dragleave', (e) => {
+        if (e.target.classList.contains('input-a')) {
+          e.target.classList.remove('drag-over');
+        }
+      });
+
+      // Drop
+      item.addEventListener('drop', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const dropIndex = parseInt(e.currentTarget.dataset.index);
+
+        // Réorganiser tableau
+        const draggedItem = this.data.moodboard[this.draggedItemIndex];
+        this.data.moodboard.splice(this.draggedItemIndex, 1);
+        this.data.moodboard.splice(dropIndex, 0, draggedItem);
+
+        // Mettre à jour affichage
+        this.updateMoodboardPreview();
+
+        // Reset classes
+        document.querySelectorAll('.input-a').forEach(el => {
+          el.classList.remove('dragging', 'drag-over');
+        });
+      });
+
+      // Fin drag
+      item.addEventListener('dragend', (e) => {
+        e.currentTarget.classList.remove('dragging');
+        document.querySelectorAll('.input-a').forEach(el => {
+          el.classList.remove('drag-over');
+        });
+      });
+    });
+  }
+
+  // === SECTIONS DRAG AND DROP ===
+  setupSectionsDragDrop() {
+    const container = document.querySelector('.right-panel-col2');
+    if (!container) return;
+
+    // Sélectionner toutes les sections draggables dans le panneau de prévisualisation
+    const sections = container.querySelectorAll('.card1');
+
+    sections.forEach((section) => {
+      const dragHandle = section.querySelector('.heading');
+      if (!dragHandle) return;
+
+      // Rendre tout le heading draggable (zone plus large)
+      dragHandle.style.cursor = 'grab';
+      dragHandle.classList.add('drag-handle');
+
+      // Activer draggable sur mousedown du heading
+      dragHandle.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+        section.setAttribute('draggable', 'true');
+        dragHandle.style.cursor = 'grabbing';
+      });
+
+      // Désactiver draggable sur mouseup
+      dragHandle.addEventListener('mouseup', () => {
+        section.setAttribute('draggable', 'false');
+        dragHandle.style.cursor = 'grab';
+      });
+
+      // Démarrage du drag
+      section.addEventListener('dragstart', (e) => {
+        // Vérifier que le drag commence bien depuis le heading-group
+        if (!e.target.classList.contains('card1')) return;
+
+        e.dataTransfer.effectAllowed = 'move';
+        section.classList.add('section-dragging');
+        this.draggedSection = section;
+      });
+
+      // Survol d'une autre section
+      section.addEventListener('dragover', (e) => {
+        e.preventDefault();
+
+        if (!this.draggedSection) return;
+        if (section === this.draggedSection) return;
+
+        const afterElement = this.getDragAfterElement(container, e.clientY);
+
+        if (afterElement == null) {
+          container.appendChild(this.draggedSection);
+        } else {
+          container.insertBefore(this.draggedSection, afterElement);
+        }
+      });
+
+      section.addEventListener('dragenter', (e) => {
+        if (section !== this.draggedSection) {
+          section.classList.add('section-drag-over');
+        }
+      });
+
+      section.addEventListener('dragleave', (e) => {
+        // Vérifier si on quitte vraiment la section
+        const rect = section.getBoundingClientRect();
+        if (
+          e.clientX < rect.left ||
+          e.clientX >= rect.right ||
+          e.clientY < rect.top ||
+          e.clientY >= rect.bottom
+        ) {
+          section.classList.remove('section-drag-over');
+        }
+      });
+
+      // Drop
+      section.addEventListener('drop', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      });
+
+      // Fin du drag
+      section.addEventListener('dragend', (e) => {
+        section.classList.remove('section-dragging');
+        section.setAttribute('draggable', 'false');
+        dragHandle.style.cursor = 'grab';
+
+        // Nettoyer toutes les classes
+        container.querySelectorAll('.card1').forEach(el => {
+          el.classList.remove('section-drag-over', 'section-dragging');
+        });
+
+        this.draggedSection = null;
+
+        // Mettre à jour l'ordre du sommaire
+        this.updateTableOfContents();
+      });
+    });
+  }
+
+  updateTableOfContents() {
+    const container = document.querySelector('.right-panel-col2');
+    const tocContainer = document.querySelector('.right-panel-col3');
+
+    if (!container || !tocContainer) return;
+
+    // Obtenir l'ordre actuel des sections
+    const sections = container.querySelectorAll('.card1');
+    const sectionTitles = Array.from(sections).map(section => {
+      const headingText = section.querySelector('.heading-text');
+      return headingText ? headingText.textContent.trim() : null;
+    }).filter(title => title !== null);
+
+    // Obtenir tous les éléments du sommaire
+    const tocItems = Array.from(tocContainer.querySelectorAll('.overlay-plus-border-shadow'));
+
+    // Créer un mapping entre les titres et les éléments du sommaire
+    const tocMap = new Map();
+    tocItems.forEach(item => {
+      const text = item.querySelector('.overlay-plus-border-shadow-text');
+      if (text) {
+        tocMap.set(text.textContent.trim(), item);
+      }
+    });
+
+    // Réorganiser les éléments du sommaire selon l'ordre des sections
+    sectionTitles.forEach(title => {
+      const tocItem = tocMap.get(title);
+      if (tocItem) {
+        tocContainer.appendChild(tocItem);
+      }
+    });
+  }
+
+  getDragAfterElement(container, y) {
+    const draggableElements = [...container.querySelectorAll('.card1:not(.section-dragging)')];
+
+    return draggableElements.reduce((closest, child) => {
+      const box = child.getBoundingClientRect();
+      const offset = y - box.top - box.height / 2;
+
+      if (offset < 0 && offset > closest.offset) {
+        return { offset: offset, element: child };
+      } else {
+        return closest;
+      }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+  }
+
+  // === NAVIGATION ===
+  setupNavigation() {
+    const tocContainer = document.querySelector('.right-panel-col3');
+    if (!tocContainer) return;
+
+    // Délégation d'événement pour gérer la navigation même après réorganisation
+    tocContainer.addEventListener('click', (e) => {
+      const navItem = e.target.closest('.overlay-plus-border-shadow');
+      if (!navItem) return;
+
+      const tocText = navItem.querySelector('.overlay-plus-border-shadow-text');
+      if (!tocText) return;
+
+      const targetTitle = tocText.textContent.trim();
+
+      // Trouver la section correspondante
+      const sections = document.querySelectorAll('.right-panel-col2 .card1');
+      const targetSection = Array.from(sections).find(section => {
+        const headingText = section.querySelector('.heading-text');
+        return headingText && headingText.textContent.trim() === targetTitle;
+      });
+
+      if (targetSection) {
+        targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+
+    // Style curseur pour tous les items
+    const navItems = tocContainer.querySelectorAll('.overlay-plus-border-shadow');
+    navItems.forEach(item => {
+      item.style.cursor = 'pointer';
     });
   }
 
@@ -404,15 +921,28 @@ class CharteGraphique {
       return;
     }
 
-    // Configuration de l'export
+    // Afficher un message de chargement
+    const loadingMsg = this.showLoadingMessage();
+
+    // Trouver et cacher temporairement les éléments problématiques
+    const svgObjects = element.querySelectorAll('object[type="image/svg+xml"]');
+    const savedDisplayValues = [];
+
+    svgObjects.forEach(obj => {
+      savedDisplayValues.push({ element: obj, display: obj.style.display });
+      obj.style.display = 'none';
+    });
+
+    // Configuration simplifiée
     const opt = {
-      margin: [10, 10],
+      margin: [5, 5],
       filename: `charte-graphique-${this.data.brandName.replace(/\s+/g, '-').toLowerCase()}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: {
         scale: 2,
-        useCORS: true,
-        logging: false
+        logging: false,
+        allowTaint: false,
+        useCORS: false
       },
       jsPDF: {
         unit: 'mm',
@@ -421,15 +951,18 @@ class CharteGraphique {
       }
     };
 
-    // Afficher un message de chargement
-    const loadingMsg = this.showLoadingMessage();
-
     try {
       await html2pdf().set(opt).from(element).save();
       this.hideLoadingMessage(loadingMsg);
     } catch (error) {
       this.hideLoadingMessage(loadingMsg);
+      console.error('Erreur PDF:', error);
       alert('Erreur lors de l\'export PDF : ' + error.message);
+    } finally {
+      // Restaurer les éléments cachés
+      savedDisplayValues.forEach(({ element, display }) => {
+        element.style.display = display;
+      });
     }
   }
 

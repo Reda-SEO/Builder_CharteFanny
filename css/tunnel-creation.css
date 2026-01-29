@@ -405,6 +405,42 @@ body {
 /* end heading*/
 
 
+/* Accordéon */
+.card1 > .row-a,
+.card1 > .heading {
+	cursor: pointer;
+	user-select: none;
+}
+
+.card1 > .row-a:hover,
+.card1 > .heading:hover {
+	background-color: rgba(0, 0, 0, 0.02);
+	border-radius: 4px;
+}
+
+.row-chevron {
+	transition: transform 0.3s ease;
+	pointer-events: none; /* Permet au clic de passer au parent */
+}
+
+/* Cacher le contenu quand collapsed - garder seulement le titre */
+.card1.collapsed > *:not(.row-a):not(.heading) {
+	max-height: 0 !important;
+	overflow: hidden;
+	opacity: 0;
+	transition: max-height 0.3s ease, opacity 0.3s ease;
+	margin-top: 0 !important;
+	margin-bottom: 0 !important;
+	padding-top: 0 !important;
+	padding-bottom: 0 !important;
+}
+
+.card1:not(.collapsed) > *:not(.row-a):not(.heading) {
+	transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+/* end Accordéon */
+
+
 .logo-plateforme-de-marque {
 	width: 16px;
 	flex-shrink: 0;
@@ -504,6 +540,68 @@ body {
 	border-radius: 8px;
 }
 
+/* Drag and drop moodboard */
+.input-a[draggable="true"] {
+	cursor: grab;
+}
+
+.input-a.dragging {
+	opacity: 0.4;
+	cursor: grabbing;
+}
+
+.input-a.drag-over {
+	border: 2px dashed var(--primary-primary-main);
+	transform: scale(1.02);
+	transition: all 0.2s ease;
+}
+
+/* Drag and drop sections */
+.right-panel-col2 .heading.drag-handle {
+	cursor: grab;
+	user-select: none;
+	transition: background-color 0.2s ease;
+	padding: 4px 8px;
+	margin: -4px -8px;
+	border-radius: 4px;
+}
+
+.right-panel-col2 .heading.drag-handle:hover {
+	background-color: rgba(39, 67, 89, 0.05);
+}
+
+.right-panel-col2 .heading.drag-handle:active {
+	cursor: grabbing;
+	background-color: rgba(39, 67, 89, 0.1);
+}
+
+.heading-group {
+	pointer-events: all;
+	transition: opacity 0.2s ease;
+}
+
+.right-panel-col2 .heading.drag-handle:hover .heading-group {
+	opacity: 0.7;
+}
+
+.card1[draggable="true"] {
+	cursor: move;
+}
+
+.card1.section-dragging {
+	opacity: 0.5;
+	transform: scale(0.98);
+	transition: all 0.2s ease;
+	border: 2px dashed var(--primary-primary-main);
+}
+
+.card1.section-drag-over {
+	border-top: 4px solid var(--primary-primary-main);
+	padding-top: 8px;
+	transition: all 0.2s ease;
+}
+/* end Drag and drop moodboard */
+
 .input-overlay-plus {
 	backdrop-filter: blur(2px);
 	margin-top: 186px;
@@ -575,6 +673,20 @@ body {
 	align-items: flex-start;
 	gap: 12px;
 	padding-left: 11px;
+	cursor: pointer;
+	user-select: none;
+	transition: background-color 0.2s ease;
+	border-radius: 4px;
+	padding: 8px 11px;
+	margin: -8px 0;
+}
+
+.right-panel-row-top:hover {
+	background-color: rgba(0, 0, 0, 0.03);
+}
+
+.right-panel-row-top:active {
+	background-color: rgba(0, 0, 0, 0.06);
 }
 
 
@@ -588,13 +700,50 @@ body {
 	flex-shrink: 0;
 	background-color: var(--white);
 	border-radius: 4px;
+	transition: transform 0.3s ease;
+	cursor: pointer;
+	pointer-events: none;
+}
+
+.cta-icon:hover {
+	box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.15),0px 2px 3px -1px rgba(0, 0, 0, 0.15);
 }
 
 .cta-icon-chevron {
-	position: absolute; top: 4px; left: 50%; 
+	position: absolute; top: 4px; left: 50%;
 	translate: -50% 0;
 	width: 16px; height: 16px;
+	transition: transform 0.3s ease;
+	pointer-events: none;
 }
+
+/* Panel toggle - masquer le panneau de gauche */
+.right-panel.left-panel-collapsed .right-panel-aside-panneau {
+	width: auto;
+	overflow: visible;
+}
+
+.right-panel.left-panel-collapsed .right-panel-aside-panneau > *:not(.right-panel-row-top) {
+	display: none;
+}
+
+.right-panel.left-panel-collapsed .right-panel-row-top {
+	width: 24px;
+}
+
+.right-panel.left-panel-collapsed .right-panel-row-top .right-panel-graphic {
+	display: none;
+}
+
+.right-panel.left-panel-collapsed .cta-icon {
+	transform: rotate(180deg);
+}
+
+.right-panel.left-panel-collapsed .right-panel-col2 {
+	margin-left: auto;
+	margin-right: auto;
+}
+
 /* end cta-icon*/
 
 
@@ -755,6 +904,11 @@ body {
 .btn-input {
 	gap: 10px;
 	text-align: unset;
+	transition: transform 0.2s ease;
+}
+
+.btn-input:hover {
+	transform: translateY(-1px);
 }
 
 .btn-input-label {
@@ -970,10 +1124,29 @@ body {
 	overflow: hidden;
 }
 
-.banner-subtitle {
+.banner-text-container {
 	margin-top: 43px;
 	flex-grow: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.banner-title {
 	text-align: left;
+	margin: 0;
+	font-size: 24px;
+	font-weight: 700;
+	color: var(--secondary-secondary-dark);
+}
+
+.banner-subtitle {
+	text-align: left;
+	font-size: 14px;
+	font-weight: 400;
+	color: var(--text-text-primary);
+	opacity: 0.7;
+	margin: 0;
 }
 
 .banner-graphic {
@@ -1076,7 +1249,29 @@ body {
 
 .right-panel-input {
 	text-align: left;
-	padding-bottom: 7px;
+	padding: 12px;
+	border: 2px solid transparent;
+	border-radius: 4px;
+	transition: border-color 0.2s ease, background-color 0.2s ease;
+	min-height: 120px;
+}
+
+.right-panel-input[contenteditable="true"]:hover {
+	background-color: rgba(0, 0, 0, 0.02);
+	border-color: rgba(0, 0, 0, 0.1);
+}
+
+.right-panel-input[contenteditable="true"]:focus {
+	outline: none;
+	background-color: white;
+	border-color: var(--primary-primary-main);
+	box-shadow: 0 0 0 3px rgba(39, 67, 89, 0.1);
+}
+
+.right-panel-input:empty:before {
+	content: 'Cliquez pour éditer...';
+	color: rgba(0, 0, 0, 0.3);
+	font-style: italic;
 }
 
 .card-overlay-plus-border-shadow6 {
@@ -1645,5 +1840,31 @@ body {
 	}
 	.card-overlay-plus-border-shadow-row-bottom2 > .input7 {
 		width: 100%;
+	}
+}
+
+/* PDF Export - Prevent page breaks inside sections */
+@media print {
+	.card1 {
+		page-break-inside: avoid;
+		break-inside: avoid;
+	}
+
+	.card-overlay-plus-border-shadow1,
+	.card-overlay-plus-border-shadow2,
+	.card-overlay-plus-border-shadow3,
+	.card-overlay-plus-border-shadow4,
+	.card-overlay-plus-border-shadow5,
+	.card-overlay-plus-border-shadow6,
+	.card-overlay-plus-border-shadow7 {
+		page-break-inside: avoid;
+		break-inside: avoid;
+	}
+
+	.right-panel-header,
+	.right-panel-input,
+	.right-panel-row {
+		page-break-inside: avoid;
+		break-inside: avoid;
 	}
 }
