@@ -937,12 +937,32 @@ class CharteGraphique {
       const textSizeStyle = document.createElement('style');
       textSizeStyle.id = 'pdf-text-size-boost';
       textSizeStyle.textContent = `
-        .right-panel-col2 * {
-          font-size: calc(1em * 1.15) !important;
-          line-height: 1.4 !important;
+        .right-panel-col2 p,
+        .right-panel-col2 h1,
+        .right-panel-col2 h2,
+        .right-panel-col2 h3,
+        .right-panel-col2 h4,
+        .right-panel-col2 span,
+        .right-panel-col2 div,
+        .right-panel-col2 label,
+        .right-panel-col2 li {
+          font-size: 1.35em !important;
+          line-height: 1.5 !important;
+        }
+        .right-panel-col2 h1 {
+          font-size: 2em !important;
+        }
+        .right-panel-col2 h2 {
+          font-size: 1.75em !important;
+        }
+        .right-panel-col2 h3 {
+          font-size: 1.5em !important;
         }
       `;
       document.head.appendChild(textSizeStyle);
+
+      // Attendre que le navigateur recalcule les styles
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       // Configuration PDF
       const margin = { top: 10, right: 15, bottom: 10, left: 15 }; // en mm
