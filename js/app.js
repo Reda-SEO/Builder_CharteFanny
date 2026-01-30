@@ -944,22 +944,32 @@ class CharteGraphique {
     element.style.marginTop = '8px';
 
     // Ajuster la bannière pour le PDF
+    const banner = document.querySelector('.banner');
     const bannerTitle = document.getElementById('banner-brand-name');
     const bannerSubtitle = document.getElementById('banner-baseline');
     const bannerGraphic = document.querySelector('.banner-graphic');
     const savedBannerStyles = {
+      bannerTransform: banner?.style.transform,
+      bannerTransformOrigin: banner?.style.transformOrigin,
+      bannerWidth: banner?.style.width,
       titleAlign: bannerTitle?.style.textAlign,
       subtitleAlign: bannerSubtitle?.style.textAlign,
       graphicMargin: bannerGraphic?.style.margin
     };
 
+    // Adapter la bannière au format PDF
+    if (banner) {
+      banner.style.transform = 'scale(0.9)';
+      banner.style.transformOrigin = 'left top';
+      banner.style.width = '100%';
+    }
     if (bannerTitle) bannerTitle.style.textAlign = 'left';
     if (bannerSubtitle) bannerSubtitle.style.textAlign = 'left';
     if (bannerGraphic) bannerGraphic.style.margin = '-92px 0 -93px auto';
 
     // Configuration avec marges minimales et gestion des sauts de page
     const opt = {
-      margin: [3, 5, 3, 5], // top, right, bottom, left (en mm)
+      margin: [1, 5, 3, 5], // top, right, bottom, left (en mm) - marge top réduite
       filename: `charte-graphique-${this.data.brandName.replace(/\s+/g, '-').toLowerCase()}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: {
@@ -1002,6 +1012,11 @@ class CharteGraphique {
       element.style.marginTop = originalMarginTop;
 
       // Restaurer les styles de la bannière
+      if (banner) {
+        banner.style.transform = savedBannerStyles.bannerTransform;
+        banner.style.transformOrigin = savedBannerStyles.bannerTransformOrigin;
+        banner.style.width = savedBannerStyles.bannerWidth;
+      }
       if (bannerTitle) bannerTitle.style.textAlign = savedBannerStyles.titleAlign;
       if (bannerSubtitle) bannerSubtitle.style.textAlign = savedBannerStyles.subtitleAlign;
       if (bannerGraphic) bannerGraphic.style.margin = savedBannerStyles.graphicMargin;
