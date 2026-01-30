@@ -948,24 +948,33 @@ class CharteGraphique {
     const bannerTitle = document.getElementById('banner-brand-name');
     const bannerSubtitle = document.getElementById('banner-baseline');
     const bannerGraphic = document.querySelector('.banner-graphic');
+    const bannerTextContainer = document.querySelector('.banner-text-container');
     const savedBannerStyles = {
-      bannerTransform: banner?.style.transform,
-      bannerTransformOrigin: banner?.style.transformOrigin,
-      bannerWidth: banner?.style.width,
+      bannerMargin: banner?.style.margin,
+      bannerMaxWidth: banner?.style.maxWidth,
       titleAlign: bannerTitle?.style.textAlign,
       subtitleAlign: bannerSubtitle?.style.textAlign,
+      textContainerTextAlign: bannerTextContainer?.style.textAlign,
+      graphicTransform: bannerGraphic?.style.transform,
+      graphicTransformOrigin: bannerGraphic?.style.transformOrigin,
       graphicMargin: bannerGraphic?.style.margin
     };
 
-    // Adapter la bannière au format PDF
+    // Adapter la bannière au format PDF - pleine largeur
     if (banner) {
-      banner.style.transform = 'scale(0.9)';
-      banner.style.transformOrigin = 'left top';
-      banner.style.width = '100%';
+      banner.style.margin = '0';
+      banner.style.maxWidth = '100%';
     }
+    // Forcer l'alignement à gauche des titres
+    if (bannerTextContainer) bannerTextContainer.style.textAlign = 'left';
     if (bannerTitle) bannerTitle.style.textAlign = 'left';
     if (bannerSubtitle) bannerSubtitle.style.textAlign = 'left';
-    if (bannerGraphic) bannerGraphic.style.margin = '-92px 0 -93px auto';
+    // Adapter le graphique pour qu'il rentre dans le PDF
+    if (bannerGraphic) {
+      bannerGraphic.style.transform = 'scale(0.8)';
+      bannerGraphic.style.transformOrigin = 'right center';
+      bannerGraphic.style.margin = '-92px -20px -93px auto';
+    }
 
     // Configuration avec marges minimales et gestion des sauts de page
     const opt = {
@@ -1012,14 +1021,19 @@ class CharteGraphique {
       element.style.marginTop = originalMarginTop;
 
       // Restaurer les styles de la bannière
+      const bannerTextContainer = document.querySelector('.banner-text-container');
       if (banner) {
-        banner.style.transform = savedBannerStyles.bannerTransform;
-        banner.style.transformOrigin = savedBannerStyles.bannerTransformOrigin;
-        banner.style.width = savedBannerStyles.bannerWidth;
+        banner.style.margin = savedBannerStyles.bannerMargin;
+        banner.style.maxWidth = savedBannerStyles.bannerMaxWidth;
       }
+      if (bannerTextContainer) bannerTextContainer.style.textAlign = savedBannerStyles.textContainerTextAlign;
       if (bannerTitle) bannerTitle.style.textAlign = savedBannerStyles.titleAlign;
       if (bannerSubtitle) bannerSubtitle.style.textAlign = savedBannerStyles.subtitleAlign;
-      if (bannerGraphic) bannerGraphic.style.margin = savedBannerStyles.graphicMargin;
+      if (bannerGraphic) {
+        bannerGraphic.style.transform = savedBannerStyles.graphicTransform;
+        bannerGraphic.style.transformOrigin = savedBannerStyles.graphicTransformOrigin;
+        bannerGraphic.style.margin = savedBannerStyles.graphicMargin;
+      }
     }
   }
 
