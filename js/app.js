@@ -909,10 +909,8 @@ class CharteGraphique {
   }
 
   async exportToPDF() {
-    // Vérifier si html2pdf est chargé
-    if (typeof html2pdf === 'undefined') {
-      await this.loadHTML2PDF();
-    }
+    // Charger jsPDF et html2canvas si nécessaire
+    await this.loadPDFLibraries();
 
     const element = document.querySelector('.right-panel-col2');
     if (!element) {
@@ -920,152 +918,165 @@ class CharteGraphique {
       return;
     }
 
-    // Afficher un message de chargement
     const loadingMsg = this.showLoadingMessage();
 
-    // Injection des styles de pagination
-    const styleElement = document.createElement('style');
-    styleElement.id = 'pdf-pagebreak-styles';
-    styleElement.textContent = `
-      /* Empêcher les coupures dans les sections principales */
-      .banner,
-      .right-panel-overlay-plus,
-      .card-overlay-plus-border-shadow6,
-      .card-overlay-plus-border-shadow7,
-      .card-overlay-plus-border-shadow8,
-      .card-overlay-plus-border-shadow9,
-      .card1 {
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
-        display: block !important;
-        position: relative !important;
-        overflow: visible !important;
-      }
-
-      /* Empêcher les coupures dans les sous-éléments critiques */
-      .card-overlay-plus-border-shadow-col8,
-      .card-overlay-plus-border-shadow-overlay-plus3,
-      .card-overlay-plus-border-shadow-overlay-plus4,
-      .card-overlay-plus-border-shadow-row4,
-      .card-overlay-plus-border-shadow-col11 {
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
-      }
-
-      /* Espacement entre sections pour éviter débordements */
-      .card1 {
-        margin-bottom: 20px !important;
-      }
-    `;
-    document.head.appendChild(styleElement);
-
-    // Trouver et cacher temporairement les éléments problématiques
-    const svgObjects = element.querySelectorAll('object[type="image/svg+xml"]');
-    const savedDisplayValues = [];
-
-    svgObjects.forEach(obj => {
-      savedDisplayValues.push({ element: obj, display: obj.style.display });
-      obj.style.display = 'none';
-    });
-
-    // Sauvegarder et optimiser temporairement le contenu pour remplir la page
-    const originalMaxWidth = element.style.maxWidth;
-    const originalPadding = element.style.padding;
-    const originalGap = element.style.gap;
-    const originalMarginTop = element.style.marginTop;
-    element.style.maxWidth = '95%';
-    element.style.padding = '0 12px';
-    element.style.gap = '8px';
-    element.style.marginTop = '8px';
-
-    // Ajuster la bannière pour le PDF
-    const bannerTitle = document.getElementById('banner-brand-name');
-    const bannerSubtitle = document.getElementById('banner-baseline');
-    const bannerGraphic = document.querySelector('.banner-graphic');
-    const savedBannerStyles = {
-      titleAlign: bannerTitle?.style.textAlign,
-      subtitleAlign: bannerSubtitle?.style.textAlign,
-      graphicMargin: bannerGraphic?.style.margin
-    };
-
-    if (bannerTitle) bannerTitle.style.textAlign = 'left';
-    if (bannerSubtitle) bannerSubtitle.style.textAlign = 'left';
-    if (bannerGraphic) bannerGraphic.style.margin = '-92px 0 -93px auto';
-
-    // Configuration avec marges minimales et gestion des sauts de page
-    const opt = {
-      margin: [1, 5, 3, 5], // top, right, bottom, left (en mm) - marge top réduite
-      filename: `charte-graphique-${this.data.brandName.replace(/\s+/g, '-').toLowerCase()}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: {
-        scale: 2,
-        logging: false,
-        allowTaint: false,
-        useCORS: false
-      },
-      jsPDF: {
-        unit: 'mm',
-        format: 'a4',
-        orientation: 'portrait'
-      },
-      pagebreak: {
-        mode: ['css', 'legacy'], // Retirer 'avoid-all' qui cause des conflits
-        avoid: [
-          '.banner',
-          '.right-panel-overlay-plus',
-          '.card1',
-          '.card-overlay-plus-border-shadow1',
-          '.card-overlay-plus-border-shadow2',
-          '.card-overlay-plus-border-shadow3',
-          '.card-overlay-plus-border-shadow4',
-          '.card-overlay-plus-border-shadow5',
-          '.card-overlay-plus-border-shadow6',
-          '.card-overlay-plus-border-shadow7',
-          '.card-overlay-plus-border-shadow8',  // AJOUTÉ
-          '.card-overlay-plus-border-shadow9'   // AJOUTÉ
-        ]
-      }
-    };
-
     try {
-      await html2pdf().set(opt).from(element).save();
+      // Cacher les SVG objects temporairement
+      const svgObjects = element.querySelectorAll('object[type="image/svg+xml"]');
+      const savedDisplayValues = [];
+      svgObjects.forEach(obj => {
+        savedDisplayValues.push({ element: obj, display: obj.style.display });
+        obj.style.display = 'none';
+      });
+
+      // Optimiser les styles pour le PDF
+      const originalStyles = this.savePDFStyles(element);
+      this.applyPDFStyles(element);
+
+      // Configuration PDF
+      const margin = { top: 10, right: 15, bottom: 10, left: 15 }; // en mm
+      const pageWidth = 210; // A4 width en mm
+      const pageHeight = 297; // A4 height en mm
+      const contentWidth = pageWidth - margin.left - margin.right;
+      const contentHeight = pageHeight - margin.top - margin.bottom;
+
+      // Créer le PDF
+      const pdf = new jspdf.jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      // Récupérer toutes les sections dans l'ordre du DOM (compatible drag & drop)
+      const sections = Array.from(element.querySelectorAll('.banner, .right-panel-overlay-plus, .card1'));
+
+      let currentY = margin.top;
+      let isFirstPage = true;
+
+      // Capturer et ajouter chaque section
+      for (let i = 0; i < sections.length; i++) {
+        const section = sections[i];
+
+        // Capturer la section avec html2canvas
+        const canvas = await html2canvas(section, {
+          scale: 2,
+          logging: false,
+          allowTaint: false,
+          useCORS: false,
+          backgroundColor: '#ffffff'
+        });
+
+        // Calculer les dimensions de la section en mm
+        const imgWidth = contentWidth;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        // Vérifier si la section rentre sur la page courante
+        if (!isFirstPage && currentY + imgHeight > pageHeight - margin.bottom) {
+          // La section ne rentre pas, créer une nouvelle page
+          pdf.addPage();
+          currentY = margin.top;
+        }
+
+        // Ajouter l'image au PDF
+        const imgData = canvas.toDataURL('image/jpeg', 0.98);
+        pdf.addImage(imgData, 'JPEG', margin.left, currentY, imgWidth, imgHeight);
+
+        // Mettre à jour la position Y
+        currentY += imgHeight + 5; // 5mm d'espace entre sections
+        isFirstPage = false;
+      }
+
+      // Sauvegarder le PDF
+      const filename = `charte-graphique-${this.data.brandName.replace(/\s+/g, '-').toLowerCase()}.pdf`;
+      pdf.save(filename);
+
+      // Restaurer les styles
+      this.restorePDFStyles(element, originalStyles);
+      savedDisplayValues.forEach(({ element, display }) => {
+        element.style.display = display;
+      });
+
       this.hideLoadingMessage(loadingMsg);
     } catch (error) {
       this.hideLoadingMessage(loadingMsg);
       console.error('Erreur PDF:', error);
       alert('Erreur lors de l\'export PDF : ' + error.message);
-    } finally {
-      // Restaurer les éléments cachés et les styles
-      savedDisplayValues.forEach(({ element, display }) => {
-        element.style.display = display;
-      });
-
-      // Restaurer les dimensions originales
-      element.style.maxWidth = originalMaxWidth;
-      element.style.padding = originalPadding;
-      element.style.gap = originalGap;
-      element.style.marginTop = originalMarginTop;
-
-      // Restaurer les styles de la bannière
-      if (bannerTitle) bannerTitle.style.textAlign = savedBannerStyles.titleAlign;
-      if (bannerSubtitle) bannerSubtitle.style.textAlign = savedBannerStyles.subtitleAlign;
-      if (bannerGraphic) bannerGraphic.style.margin = savedBannerStyles.graphicMargin;
-
-      // Supprimer le style injecté
-      const injectedStyle = document.getElementById('pdf-pagebreak-styles');
-      if (injectedStyle) {
-        injectedStyle.remove();
-      }
     }
   }
 
-  loadHTML2PDF() {
+  savePDFStyles(element) {
+    const bannerTitle = document.getElementById('banner-brand-name');
+    const bannerSubtitle = document.getElementById('banner-baseline');
+    const bannerGraphic = document.querySelector('.banner-graphic');
+
+    return {
+      element: {
+        maxWidth: element.style.maxWidth,
+        padding: element.style.padding,
+        gap: element.style.gap,
+        marginTop: element.style.marginTop
+      },
+      banner: {
+        titleAlign: bannerTitle?.style.textAlign,
+        subtitleAlign: bannerSubtitle?.style.textAlign,
+        graphicMargin: bannerGraphic?.style.margin
+      }
+    };
+  }
+
+  applyPDFStyles(element) {
+    element.style.maxWidth = '95%';
+    element.style.padding = '0 12px';
+    element.style.gap = '8px';
+    element.style.marginTop = '8px';
+
+    const bannerTitle = document.getElementById('banner-brand-name');
+    const bannerSubtitle = document.getElementById('banner-baseline');
+    const bannerGraphic = document.querySelector('.banner-graphic');
+
+    if (bannerTitle) bannerTitle.style.textAlign = 'left';
+    if (bannerSubtitle) bannerSubtitle.style.textAlign = 'left';
+    if (bannerGraphic) bannerGraphic.style.margin = '-92px 0 -93px auto';
+  }
+
+  restorePDFStyles(element, originalStyles) {
+    element.style.maxWidth = originalStyles.element.maxWidth;
+    element.style.padding = originalStyles.element.padding;
+    element.style.gap = originalStyles.element.gap;
+    element.style.marginTop = originalStyles.element.marginTop;
+
+    const bannerTitle = document.getElementById('banner-brand-name');
+    const bannerSubtitle = document.getElementById('banner-baseline');
+    const bannerGraphic = document.querySelector('.banner-graphic');
+
+    if (bannerTitle) bannerTitle.style.textAlign = originalStyles.banner.titleAlign;
+    if (bannerSubtitle) bannerSubtitle.style.textAlign = originalStyles.banner.subtitleAlign;
+    if (bannerGraphic) bannerGraphic.style.margin = originalStyles.banner.graphicMargin;
+  }
+
+  loadPDFLibraries() {
     return new Promise((resolve, reject) => {
-      const script = document.createElement('script');
-      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
-      script.onload = resolve;
-      script.onerror = reject;
-      document.head.appendChild(script);
+      // Vérifier si jsPDF est déjà chargé
+      if (typeof jspdf !== 'undefined' && typeof html2canvas !== 'undefined') {
+        resolve();
+        return;
+      }
+
+      // Charger jsPDF
+      const jspdfScript = document.createElement('script');
+      jspdfScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+
+      jspdfScript.onload = () => {
+        // Charger html2canvas après jsPDF
+        const html2canvasScript = document.createElement('script');
+        html2canvasScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+        html2canvasScript.onload = resolve;
+        html2canvasScript.onerror = reject;
+        document.head.appendChild(html2canvasScript);
+      };
+
+      jspdfScript.onerror = reject;
+      document.head.appendChild(jspdfScript);
     });
   }
 
