@@ -933,6 +933,17 @@ class CharteGraphique {
       const originalStyles = this.savePDFStyles(element);
       this.applyPDFStyles(element);
 
+      // Injecter CSS pour augmenter la taille du texte
+      const textSizeStyle = document.createElement('style');
+      textSizeStyle.id = 'pdf-text-size-boost';
+      textSizeStyle.textContent = `
+        .right-panel-col2 * {
+          font-size: calc(1em * 1.15) !important;
+          line-height: 1.4 !important;
+        }
+      `;
+      document.head.appendChild(textSizeStyle);
+
       // Configuration PDF
       const margin = { top: 10, right: 15, bottom: 10, left: 15 }; // en mm
       const pageWidth = 210; // A4 width en mm
@@ -959,7 +970,7 @@ class CharteGraphique {
 
         // Capturer la section avec html2canvas
         const canvas = await html2canvas(section, {
-          scale: 2.5,
+          scale: 2,
           logging: false,
           allowTaint: false,
           useCORS: false,
@@ -996,8 +1007,20 @@ class CharteGraphique {
         element.style.display = display;
       });
 
+      // Retirer le style de boost de texte
+      const textSizeStyle = document.getElementById('pdf-text-size-boost');
+      if (textSizeStyle) {
+        textSizeStyle.remove();
+      }
+
       this.hideLoadingMessage(loadingMsg);
     } catch (error) {
+      // Retirer le style de boost de texte en cas d'erreur
+      const textSizeStyle = document.getElementById('pdf-text-size-boost');
+      if (textSizeStyle) {
+        textSizeStyle.remove();
+      }
+
       this.hideLoadingMessage(loadingMsg);
       console.error('Erreur PDF:', error);
       alert('Erreur lors de l\'export PDF : ' + error.message);
