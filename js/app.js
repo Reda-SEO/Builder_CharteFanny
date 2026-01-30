@@ -911,7 +911,6 @@ class CharteGraphique {
   async exportToPDF() {
     // Vérifier si html2pdf est chargé
     if (typeof html2pdf === 'undefined') {
-      alert('Chargement de la bibliothèque PDF...');
       await this.loadHTML2PDF();
     }
 
