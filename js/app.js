@@ -959,7 +959,7 @@ class CharteGraphique {
 
         // Capturer la section avec html2canvas
         const canvas = await html2canvas(section, {
-          scale: 2,
+          scale: 2.5,
           logging: false,
           allowTaint: false,
           useCORS: false,
