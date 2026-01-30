@@ -923,6 +923,42 @@ class CharteGraphique {
     // Afficher un message de chargement
     const loadingMsg = this.showLoadingMessage();
 
+    // Injection des styles de pagination
+    const styleElement = document.createElement('style');
+    styleElement.id = 'pdf-pagebreak-styles';
+    styleElement.textContent = `
+      /* Empêcher les coupures dans les sections principales */
+      .banner,
+      .right-panel-overlay-plus,
+      .card-overlay-plus-border-shadow6,
+      .card-overlay-plus-border-shadow7,
+      .card-overlay-plus-border-shadow8,
+      .card-overlay-plus-border-shadow9,
+      .card1 {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        display: block !important;
+        position: relative !important;
+        overflow: visible !important;
+      }
+
+      /* Empêcher les coupures dans les sous-éléments critiques */
+      .card-overlay-plus-border-shadow-col8,
+      .card-overlay-plus-border-shadow-overlay-plus3,
+      .card-overlay-plus-border-shadow-overlay-plus4,
+      .card-overlay-plus-border-shadow-row4,
+      .card-overlay-plus-border-shadow-col11 {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+
+      /* Espacement entre sections pour éviter débordements */
+      .card1 {
+        margin-bottom: 20px !important;
+      }
+    `;
+    document.head.appendChild(styleElement);
+
     // Trouver et cacher temporairement les éléments problématiques
     const svgObjects = element.querySelectorAll('object[type="image/svg+xml"]');
     const savedDisplayValues = [];
@@ -973,11 +1009,21 @@ class CharteGraphique {
         orientation: 'portrait'
       },
       pagebreak: {
-        mode: ['avoid-all', 'css', 'legacy'],
-        avoid: ['.card1', '.card-overlay-plus-border-shadow1', '.card-overlay-plus-border-shadow2',
-                '.card-overlay-plus-border-shadow3', '.card-overlay-plus-border-shadow4',
-                '.card-overlay-plus-border-shadow5', '.card-overlay-plus-border-shadow6',
-                '.card-overlay-plus-border-shadow7']
+        mode: ['css', 'legacy'], // Retirer 'avoid-all' qui cause des conflits
+        avoid: [
+          '.banner',
+          '.right-panel-overlay-plus',
+          '.card1',
+          '.card-overlay-plus-border-shadow1',
+          '.card-overlay-plus-border-shadow2',
+          '.card-overlay-plus-border-shadow3',
+          '.card-overlay-plus-border-shadow4',
+          '.card-overlay-plus-border-shadow5',
+          '.card-overlay-plus-border-shadow6',
+          '.card-overlay-plus-border-shadow7',
+          '.card-overlay-plus-border-shadow8',  // AJOUTÉ
+          '.card-overlay-plus-border-shadow9'   // AJOUTÉ
+        ]
       }
     };
 
@@ -1004,6 +1050,12 @@ class CharteGraphique {
       if (bannerTitle) bannerTitle.style.textAlign = savedBannerStyles.titleAlign;
       if (bannerSubtitle) bannerSubtitle.style.textAlign = savedBannerStyles.subtitleAlign;
       if (bannerGraphic) bannerGraphic.style.margin = savedBannerStyles.graphicMargin;
+
+      // Supprimer le style injecté
+      const injectedStyle = document.getElementById('pdf-pagebreak-styles');
+      if (injectedStyle) {
+        injectedStyle.remove();
+      }
     }
   }
 
