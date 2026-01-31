@@ -1071,9 +1071,9 @@ class CharteGraphique {
       banner.style.paddingBottom = '20px'; // Espace en bas
     }
 
-    // Ajuster la position du graphique
+    // Ajuster la position du graphique (rapprocher vers la gauche)
     if (bannerGraphic) {
-      bannerGraphic.style.margin = '-60px 0 -40px auto'; // Marges moins agressives
+      bannerGraphic.style.margin = '-60px -25px -40px -100px'; // Rapproché vers la gauche
     }
   }
 
