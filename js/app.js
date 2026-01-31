@@ -948,7 +948,14 @@ class CharteGraphique {
       });
 
       // Récupérer toutes les sections dans l'ordre du DOM (compatible drag & drop)
-      const sections = Array.from(element.querySelectorAll('.banner, .right-panel-overlay-plus, .card1'));
+      const allSections = Array.from(element.querySelectorAll('.banner, .right-panel-overlay-plus, .card1'));
+
+      // Filtrer pour ne garder que les sections de premier niveau (pas les enfants imbriqués)
+      const sections = allSections.filter(section => {
+        // Vérifier si un parent a aussi la classe card1, banner ou right-panel-overlay-plus
+        const parent = section.parentElement.closest('.banner, .right-panel-overlay-plus, .card1');
+        return !parent; // Garder seulement si pas de parent avec ces classes
+      });
 
       let currentY = margin.top;
       let isFirstPage = true;
