@@ -921,8 +921,8 @@ class CharteGraphique {
     const loadingMsg = this.showLoadingMessage();
 
     try {
-      // Cacher les SVG objects temporairement
-      const svgObjects = element.querySelectorAll('object[type="image/svg+xml"]');
+      // Cacher les SVG objects temporairement (sauf le banner-graphic)
+      const svgObjects = element.querySelectorAll('object[type="image/svg+xml"]:not(.banner-graphic)');
       const savedDisplayValues = [];
       svgObjects.forEach(obj => {
         savedDisplayValues.push({ element: obj, display: obj.style.display });
@@ -1030,6 +1030,7 @@ class CharteGraphique {
     const bannerTitle = document.getElementById('banner-brand-name');
     const bannerSubtitle = document.getElementById('banner-baseline');
     const bannerGraphic = document.querySelector('.banner-graphic');
+    const banner = document.querySelector('.banner');
 
     return {
       element: {
@@ -1041,7 +1042,10 @@ class CharteGraphique {
       banner: {
         titleAlign: bannerTitle?.style.textAlign,
         subtitleAlign: bannerSubtitle?.style.textAlign,
-        graphicMargin: bannerGraphic?.style.margin
+        graphicMargin: bannerGraphic?.style.margin,
+        overflow: banner?.style.overflow,
+        minHeight: banner?.style.minHeight,
+        paddingBottom: banner?.style.paddingBottom
       }
     };
   }
@@ -1055,10 +1059,22 @@ class CharteGraphique {
     const bannerTitle = document.getElementById('banner-brand-name');
     const bannerSubtitle = document.getElementById('banner-baseline');
     const bannerGraphic = document.querySelector('.banner-graphic');
+    const banner = document.querySelector('.banner');
 
     if (bannerTitle) bannerTitle.style.textAlign = 'left';
     if (bannerSubtitle) bannerSubtitle.style.textAlign = 'left';
-    if (bannerGraphic) bannerGraphic.style.margin = '-92px 0 -93px auto';
+
+    // Ajuster la bannière pour que tout soit visible dans le PDF
+    if (banner) {
+      banner.style.overflow = 'visible'; // Permet au contenu de dépasser
+      banner.style.minHeight = '180px'; // Hauteur minimum pour tout afficher
+      banner.style.paddingBottom = '20px'; // Espace en bas
+    }
+
+    // Ajuster la position du graphique
+    if (bannerGraphic) {
+      bannerGraphic.style.margin = '-60px 0 -40px auto'; // Marges moins agressives
+    }
   }
 
   restorePDFStyles(element, originalStyles) {
@@ -1070,10 +1086,17 @@ class CharteGraphique {
     const bannerTitle = document.getElementById('banner-brand-name');
     const bannerSubtitle = document.getElementById('banner-baseline');
     const bannerGraphic = document.querySelector('.banner-graphic');
+    const banner = document.querySelector('.banner');
 
     if (bannerTitle) bannerTitle.style.textAlign = originalStyles.banner.titleAlign;
     if (bannerSubtitle) bannerSubtitle.style.textAlign = originalStyles.banner.subtitleAlign;
     if (bannerGraphic) bannerGraphic.style.margin = originalStyles.banner.graphicMargin;
+
+    if (banner) {
+      banner.style.overflow = originalStyles.banner.overflow;
+      banner.style.minHeight = originalStyles.banner.minHeight;
+      banner.style.paddingBottom = originalStyles.banner.paddingBottom;
+    }
   }
 
   loadPDFLibraries() {
