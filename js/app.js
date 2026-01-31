@@ -933,37 +933,6 @@ class CharteGraphique {
       const originalStyles = this.savePDFStyles(element);
       this.applyPDFStyles(element);
 
-      // Injecter CSS pour augmenter la taille du texte
-      const textSizeStyle = document.createElement('style');
-      textSizeStyle.id = 'pdf-text-size-boost';
-      textSizeStyle.textContent = `
-        .right-panel-col2 p,
-        .right-panel-col2 h1,
-        .right-panel-col2 h2,
-        .right-panel-col2 h3,
-        .right-panel-col2 h4,
-        .right-panel-col2 span,
-        .right-panel-col2 div,
-        .right-panel-col2 label,
-        .right-panel-col2 li {
-          font-size: 1.35em !important;
-          line-height: 1.5 !important;
-        }
-        .right-panel-col2 h1 {
-          font-size: 2em !important;
-        }
-        .right-panel-col2 h2 {
-          font-size: 1.75em !important;
-        }
-        .right-panel-col2 h3 {
-          font-size: 1.5em !important;
-        }
-      `;
-      document.head.appendChild(textSizeStyle);
-
-      // Attendre que le navigateur recalcule les styles
-      await new Promise(resolve => setTimeout(resolve, 100));
-
       // Configuration PDF
       const margin = { top: 10, right: 15, bottom: 10, left: 15 }; // en mm
       const pageWidth = 210; // A4 width en mm
@@ -988,6 +957,17 @@ class CharteGraphique {
       for (let i = 0; i < sections.length; i++) {
         const section = sections[i];
 
+        // Sauvegarder le transform original
+        const originalTransform = section.style.transform;
+        const originalTransformOrigin = section.style.transformOrigin;
+
+        // Agrandir la section de 30% pour rendre le texte plus lisible
+        section.style.transform = 'scale(1.3)';
+        section.style.transformOrigin = 'top left';
+
+        // Attendre que le navigateur recalcule
+        await new Promise(resolve => setTimeout(resolve, 50));
+
         // Capturer la section avec html2canvas
         const canvas = await html2canvas(section, {
           scale: 2,
@@ -996,6 +976,10 @@ class CharteGraphique {
           useCORS: false,
           backgroundColor: '#ffffff'
         });
+
+        // Restaurer le transform
+        section.style.transform = originalTransform;
+        section.style.transformOrigin = originalTransformOrigin;
 
         // Calculer les dimensions de la section en mm
         const imgWidth = contentWidth;
@@ -1027,20 +1011,8 @@ class CharteGraphique {
         element.style.display = display;
       });
 
-      // Retirer le style de boost de texte
-      const textSizeStyle = document.getElementById('pdf-text-size-boost');
-      if (textSizeStyle) {
-        textSizeStyle.remove();
-      }
-
       this.hideLoadingMessage(loadingMsg);
     } catch (error) {
-      // Retirer le style de boost de texte en cas d'erreur
-      const textSizeStyle = document.getElementById('pdf-text-size-boost');
-      if (textSizeStyle) {
-        textSizeStyle.remove();
-      }
-
       this.hideLoadingMessage(loadingMsg);
       console.error('Erreur PDF:', error);
       alert('Erreur lors de l\'export PDF : ' + error.message);
